@@ -21,6 +21,7 @@ Características principales
 • Cabeza y cuello: No tienen plumas; su piel es de color gris oscuro o negro mate, de aspecto arrugado. Esta adaptación evita que se ensucie con la descomposición al alimentarse."""
 DESCRIPCION_SIRIRI = (Path(__file__).parent / "datos/siriri.txt").read_text(encoding="utf-8").strip()
 DESCRIPCION_TORCAZA = (Path(__file__).parent / "datos/torcaza.txt").read_text(encoding="utf-8").strip()
+DESCRIPCION_SINSONTE = (Path(__file__).parent / "datos/sinsonte.txt").read_text(encoding="utf-8").strip()
 
 
 @pytest.fixture(scope="module")
@@ -215,6 +216,118 @@ def test_torcaza_nueva_no_hereda_medida_anterior():
     historial = [{"role": "user", "content": "Era un ave de 12 cm."},
                  {"role": "assistant", "content": OPCIONES_TENTATIVAS}]
     assert reunir_pistas(DESCRIPCION_TORCAZA, historial) == DESCRIPCION_TORCAZA
+
+
+@pytest.mark.parametrize(("texto", "campo", "taxon"), [
+    ("Es de la familia Mimidae.", "familia", "Mimidae"),
+    ("Es de la familia MIMIDAE.", "familia", "Mimidae"),
+    ("Pertenece al orden Sphenisciformes.", "orden", "Sphenisciformes"),
+])
+def test_taxonomia_sin_cobertura_no_se_ignora(catalogo, texto, campo, taxon):
+    ids, criterios = filtrar_por_taxonomia(catalogo.aves, texto, list(catalogo.aves))
+    assert criterios[campo] == [taxon]
+    assert ids == []
+
+
+def test_familia_ausente_negada_no_restringe(catalogo):
+    ids, criterios = filtrar_por_taxonomia(catalogo.aves, "No pertenece a la familia Mimidae.", list(catalogo.aves))
+    assert len(ids) == 120
+    assert not criterios
+
+
+def test_sinonimo_paseriformes_no_crea_orden_inexistente(catalogo):
+    ids, criterios = filtrar_por_taxonomia(catalogo.aves, "Es un ave paseriforme, de los paseriformes.", list(catalogo.aves))
+    assert ids
+    assert criterios == {"orden": ["Passeriformes"]}
+
+
+def test_sinsonte_fuera_del_catalogo_no_sugiere_otras_familias(config, catalogo):
+    def no_buscar(*args, **kwargs):
+        pytest.fail("Una familia sin cobertura no debe llegar a la búsqueda ni a la selección.")
+
+    def chat_json(_instrucciones, entrada):
+        assert "vocabulario" in entrada
+        return {"colores_principales": ["gris", "blanco"], "dieta": [], "entorno": [], "vuelo": []}
+
+    asistente = AsistenteAves(config, catalogo, SimpleNamespace(retrieve_relevant_chunks=no_buscar),
+                              SimpleNamespace(chat_json=chat_json))
+    respuesta = asistente.responder(DESCRIPCION_SINSONTE)
+    assert respuesta["estado"] == "abstencion"
+    assert not respuesta["aves"]
+    assert respuesta["diagnostico"]["taxones_sin_cobertura"] == {"familia": ["Mimidae"]}
+    assert "catálogo actual no incluye fichas" in respuesta["mensaje"]
+    assert "revisar esas pistas" not in respuesta["mensaje"]
+
+
+def test_sinsonte_descripcion_nueva_no_hereda_otro_tamano():
+    from app import reunir_pistas
+
+    historial = [{"role": "user", "content": "Ave de 12 cm en el parque."},
+                 {"role": "assistant", "content": OPCIONES_TENTATIVAS}]
+    assert reunir_pistas(DESCRIPCION_SINSONTE, historial) == DESCRIPCION_SINSONTE
+
+
+@pytest.mark.parametrize("pista_intermedia", [None, "Tenía alas blancas."])
+def test_cambio_de_familia_descarta_la_observacion_anterior(pista_intermedia):
+    from app import reunir_pistas
+
+    historial = [{"role": "user", "content": DESCRIPCION_SINSONTE},
+                 {"role": "assistant", "content": "No puedo identificar el ave con la información disponible."}]
+    if pista_intermedia:
+        historial.extend([{"role": "user", "content": pista_intermedia},
+                          {"role": "assistant", "content": OPCIONES_TENTATIVAS}])
+    mensaje = "Alaudidae esta es la familia del ave, no me acuerdo mucho su forma"
+    assert reunir_pistas(mensaje, historial) == mensaje
+
+
+def test_aclaracion_no_reincorpora_observacion_de_otra_familia():
+    from app import reunir_pistas
+
+    historial = [{"role": "user", "content": DESCRIPCION_SINSONTE},
+                 {"role": "assistant", "content": OPCIONES_TENTATIVAS},
+                 {"role": "user", "content": "Tenía las alas blancas."},
+                 {"role": "assistant", "content": OPCIONES_TENTATIVAS},
+                 {"role": "user", "content": "La familia es Alaudidae."},
+                 {"role": "assistant", "content": "No puedo identificar el ave con la información disponible."}]
+    texto = reunir_pistas("No recuerdo su color.", historial)
+    assert "Alaudidae" in texto
+    assert "No recuerdo su color" in texto
+    assert "Mimidae" not in texto
+    assert "blancas" not in texto
+    assert "25 cm" not in texto
+
+
+def test_misma_familia_conserva_las_pistas():
+    from app import reunir_pistas
+
+    historial = [{"role": "user", "content": "Familia Mimidae, ave gris de 25 cm."},
+                 {"role": "assistant", "content": OPCIONES_TENTATIVAS}]
+    texto = reunir_pistas("Confirmo que es de la familia Mimidae.", historial)
+    assert "gris de 25 cm" in texto
+
+
+def test_familia_negada_no_inicia_otra_observacion():
+    from app import reunir_pistas
+
+    historial = [{"role": "user", "content": "Es un tiránido gris de 22 cm."},
+                 {"role": "assistant", "content": OPCIONES_TENTATIVAS}]
+    assert "gris de 22 cm" in reunir_pistas("No pertenece a la familia Mimidae.", historial)
+
+
+def test_solo_familia_sin_cobertura_responde_sobre_esa_familia(config, catalogo):
+    def no_buscar(*args, **kwargs):
+        pytest.fail("No debe buscar candidatas de una familia sin cobertura.")
+
+    modelo = SimpleNamespace(chat_json=lambda *_: {"colores_principales": [], "dieta": [], "entorno": [], "vuelo": []})
+    asistente = AsistenteAves(config, catalogo, SimpleNamespace(retrieve_relevant_chunks=no_buscar), modelo)
+    r = asistente.responder("Alaudidae esta es la familia del ave, no me acuerdo mucho su forma")
+    assert r["estado"] == "abstencion"
+    assert r["diagnostico"]["taxonomia_consultada"] == {"familia": ["Alaudidae"]}
+    assert r["diagnostico"]["atributos"]["rango_tamano_cm"] is None
+    assert r["diagnostico"]["atributos"]["colores_principales"] == []
+    assert "Alaudidae" in r["mensaje"]
+    assert "Mimidae" not in r["mensaje"]
+    assert "¿De qué color" not in r["mensaje"]
 
 
 class ModeloPrueba:

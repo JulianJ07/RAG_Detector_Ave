@@ -7,7 +7,7 @@ import gradio as gr
 
 from avesco.asistente import AsistenteAves, ETIQUETAS_CAMPOS, NO_SE, OPCIONES_TENTATIVAS
 from avesco.configuracion import Configuracion
-from avesco.consulta import extraer_atributos
+from avesco.consulta import extraer_atributos, extraer_taxonomia
 from avesco.datos import Catalogo
 from avesco.indice import crear_indice
 from avesco.modelos import ErrorModelo
@@ -71,13 +71,25 @@ def reunir_pistas(mensaje, historial):
     # Las respuestas breves a preguntas aclaratorias siguen acumulando pistas.
     if len(mensaje) >= 240 and actuales.rango_tamano_cm and len(actuales.colores_principales) >= 2:
         return mensaje
+    familia_observacion = set(extraer_taxonomia(mensaje).get("familia", []))
+    limite_familia = 1 if familia_observacion else None
     pistas = [mensaje]
     for anterior, respuesta in zip(historial[-2::-2], historial[-1::-2]):
         if anterior["role"] != "user" or respuesta["role"] != "assistant":
             break
         if not texto_del_mensaje(respuesta).startswith((NO_SE, OPCIONES_TENTATIVAS)):
             break
-        pistas.append(texto_del_mensaje(anterior))
+        texto_anterior = texto_del_mensaje(anterior)
+        familias_anteriores = set(extraer_taxonomia(texto_anterior).get("familia", []))
+        if familia_observacion and familias_anteriores and familia_observacion.isdisjoint(familias_anteriores):
+            # Si el mensaje cambia de familia, también descarta las pistas breves
+            # intermedias que pertenecían a la observación anterior.
+            pistas = pistas[:limite_familia]
+            break
+        familia_observacion.update(familias_anteriores)
+        pistas.append(texto_anterior)
+        if familias_anteriores:
+            limite_familia = len(pistas)
     return "\n".join(reversed(pistas))
 
 

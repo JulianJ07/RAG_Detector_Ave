@@ -64,7 +64,7 @@ def test_opciones_tentativas_no_son_identificacion_firme(catalogo):
 
 def test_reserva_no_se_ejecuta_por_defecto(catalogo):
     casos = cargar_casos(RAIZ / "evaluacion/casos_robustez.json", ["regresion", "desarrollo"], catalogo)
-    assert len(casos) == 22
+    assert len(casos) == 26
     assert all(c["grupo"] != "reserva" for c in casos)
 
 

@@ -417,6 +417,94 @@
           "content": "Estas son posibles opciones, con confianza baja."
         }
       ]
+    },
+    {
+      "id": "reg_sinsonte_sin_cobertura",
+      "grupo": "regresion",
+      "origen": "fallo_reportado_por_usuario",
+      "consulta": "es un ave paseriforme de tamaño mediano de la familia Mimidae, muy conocida por su plumaje gris y su excepcional capacidad para imitar cantos y sonidos.\n\nCaracterísticas principales\n\n• Tamaño y peso: Mide aproximadamente 25 cm de longitud y pesa cerca de 54 gramos.\n• Plumaje: Es de color gris claro en la cabeza y el dorso, con partes inferiores de tono blanquecino.\n• Alas y cola: Las alas son de color gris oscuro o negruzco con dos barras o parches blancos muy notorios al volar. La cola es larga, oscura y con las puntas o bordes blancos.\n• Pico y ojos: Posee un pico delgado, negro y ligeramente curvado, y ojos de un tono amarillo pálido o claro.\n",
+      "esperado": null,
+      "especie_reportada": "sinsonte; especie científica no confirmada",
+      "atributos_esperados": {
+        "rango_tamano_cm": [
+          20,
+          30
+        ],
+        "colores_principales": [
+          "gris",
+          "blanco"
+        ]
+      },
+      "nota": "Se exige abstención porque Mimidae no está en el catálogo. El usuario reportó conversación no limpia, sin proporcionar los mensajes previos."
+    },
+    {
+      "id": "reg_sinsonte_historial",
+      "grupo": "regresion",
+      "origen": "reproduccion_sintetica_del_fallo",
+      "consulta": "es un ave paseriforme de tamaño mediano de la familia Mimidae, muy conocida por su plumaje gris y su excepcional capacidad para imitar cantos y sonidos.\n\nCaracterísticas principales\n\n• Tamaño y peso: Mide aproximadamente 25 cm de longitud y pesa cerca de 54 gramos.\n• Plumaje: Es de color gris claro en la cabeza y el dorso, con partes inferiores de tono blanquecino.\n• Alas y cola: Las alas son de color gris oscuro o negruzco con dos barras o parches blancos muy notorios al volar. La cola es larga, oscura y con las puntas o bordes blancos.\n• Pico y ojos: Posee un pico delgado, negro y ligeramente curvado, y ojos de un tono amarillo pálido o claro.\n",
+      "esperado": null,
+      "especie_reportada": "sinsonte; especie científica no confirmada",
+      "atributos_esperados": {
+        "rango_tamano_cm": [
+          20,
+          30
+        ],
+        "colores_principales": [
+          "gris",
+          "blanco"
+        ]
+      },
+      "nota": "Historial sintético; no reproduce mensajes reales anteriores que no se proporcionaron.",
+      "historial": [
+        {
+          "role": "user",
+          "content": "Era un ave de 12 cm en un parque."
+        },
+        {
+          "role": "assistant",
+          "content": "Estas son posibles opciones, con confianza baja."
+        }
+      ]
+    },
+    {
+      "id": "reg_alaudidae_solo_familia",
+      "grupo": "regresion",
+      "origen": "fallo_reportado_por_usuario",
+      "consulta": "Alaudidae esta es la familia del ave, no me acuerdo mucho su forma",
+      "esperado": null,
+      "atributos_esperados": {
+        "rango_tamano_cm": null,
+        "colores_principales": [],
+        "dieta": [],
+        "entorno": [],
+        "vuelo": []
+      },
+      "nota": "Solo debe reconocer Alaudidae como familia sin cobertura; no hay rasgos físicos afirmados."
+    },
+    {
+      "id": "reg_alaudidae_cambio_familia",
+      "grupo": "regresion",
+      "origen": "reproduccion_del_cambio_de_familia",
+      "consulta": "Alaudidae esta es la familia del ave, no me acuerdo mucho su forma",
+      "esperado": null,
+      "atributos_esperados": {
+        "rango_tamano_cm": null,
+        "colores_principales": [],
+        "dieta": [],
+        "entorno": [],
+        "vuelo": []
+      },
+      "nota": "Reproduce la secuencia de descripciones reportada, con una respuesta previa simplificada. No debe heredar Mimidae ni los rasgos del sinsonte.",
+      "historial": [
+        {
+          "role": "user",
+          "content": "es un ave paseriforme de tamaño mediano de la familia Mimidae, muy conocida por su plumaje gris y su excepcional capacidad para imitar cantos y sonidos.\n\nCaracterísticas principales\n\n• Tamaño y peso: Mide aproximadamente 25 cm de longitud y pesa cerca de 54 gramos.\n• Plumaje: Es de color gris claro en la cabeza y el dorso, con partes inferiores de tono blanquecino.\n• Alas y cola: Las alas son de color gris oscuro o negruzco con dos barras o parches blancos muy notorios al volar. La cola es larga, oscura y con las puntas o bordes blancos.\n• Pico y ojos: Posee un pico delgado, negro y ligeramente curvado, y ojos de un tono amarillo pálido o claro.\n"
+        },
+        {
+          "role": "assistant",
+          "content": "No puedo identificar el ave con la información disponible. El catálogo actual no incluye fichas para familia: Mimidae."
+        }
+      ]
     }
   ]
 }

@@ -143,8 +143,8 @@ def filtrar_por_tamano(aves, rango_tamano_cm):
     ]
 
 
-def filtrar_por_taxonomia(aves, texto, ids):
-    """Filtra solo familias y órdenes mencionados explícitamente en la descripción."""
+def extraer_taxonomia(texto, aves=None):
+    """Reconoce taxones afirmados, incluso cuando no hay fichas de ese grupo."""
     texto = normalizar(texto)
     alias = {
         "familia": {"Tyrannidae": r"tiranidos?", "Trochilidae": r"colibri(?:es|s)?"},
@@ -153,7 +153,16 @@ def filtrar_por_taxonomia(aves, texto, ids):
     criterios = {}
     for campo in ("familia", "orden"):
         mencionados = []
-        for taxon in sorted({ave[campo] for ave in aves.values()}):
+        taxones = {normalizar(ave[campo]): ave[campo] for ave in (aves or {}).values()}
+        # Las familias y órdenes fuera del catálogo también son restricciones.
+        # Ignorarlos permitiría responder con especies de otro grupo taxonómico.
+        sufijo = "idae" if campo == "familia" else "formes"
+        for m in re.finditer(rf"\b[a-z]{{3,}}{sufijo}\b", texto):
+            literal = m[0]
+            canonico = next((taxon for taxon, patron in alias[campo].items()
+                             if re.fullmatch(patron, literal)), literal.capitalize())
+            taxones.setdefault(normalizar(canonico), canonico)
+        for taxon in sorted(taxones.values()):
             patron = re.escape(normalizar(taxon))
             if taxon in alias[campo]:
                 patron += "|" + alias[campo][taxon]
@@ -167,5 +176,11 @@ def filtrar_por_taxonomia(aves, texto, ids):
                 break
         if mencionados:
             criterios[campo] = mencionados
+    return criterios
+
+
+def filtrar_por_taxonomia(aves, texto, ids):
+    """Filtra solo familias y órdenes mencionados explícitamente en la descripción."""
+    criterios = extraer_taxonomia(texto, aves)
     return ([id_ave for id_ave in ids
              if all(aves[id_ave][campo] in valores for campo, valores in criterios.items())], criterios)

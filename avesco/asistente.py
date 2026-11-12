@@ -3,7 +3,7 @@
 import re
 from dataclasses import asdict
 
-from avesco.consulta import CAMPOS, MEDIDA, extraer_atributos, extraer_tamano, filtrar_por_tamano, filtrar_por_taxonomia, normalizar, tokens
+from avesco.consulta import CAMPOS, MEDIDA, extraer_atributos, extraer_tamano, extraer_taxonomia, filtrar_por_tamano, filtrar_por_taxonomia, normalizar, tokens
 
 NO_SE = "No puedo identificar el ave con la información disponible."
 OPCIONES_TENTATIVAS = "Estas son posibles opciones, con confianza baja."
@@ -160,7 +160,7 @@ class AsistenteAves:
             pista = "¿De qué color era el ave? ¿Viste alguna mancha o raya en las alas?"
         else:
             pista = "¿Recuerdas algún detalle del pico o de las alas?"
-        if not cantidad_rasgos and not nombres:
+        if not cantidad_rasgos and not nombres and not extraer_taxonomia(texto):
             resultado["mensaje"] += " " + pista
             return resultado
 
@@ -174,7 +174,19 @@ class AsistenteAves:
             diagnostico["taxonomia_consultada"] = taxonomia
             diagnostico["especies_despues_de_taxonomia"] = len(elegibles)
             if not elegibles:
-                resultado["mensaje"] += " Ninguna ficha coincide con la familia u orden y el tamaño indicados. ¿Puedes revisar esas pistas?"
+                sin_cobertura = {
+                    campo: valores for campo, valores in taxonomia.items()
+                    if not any(ave[campo] in valores for ave in self.catalogo.aves.values())
+                }
+                if sin_cobertura:
+                    diagnostico["taxones_sin_cobertura"] = sin_cobertura
+                    detalle = "; ".join(f"{campo}: {lista_texto(valores)}" for campo, valores in sin_cobertura.items())
+                    resultado["mensaje"] += (
+                        f" El catálogo actual no incluye fichas para {detalle}. "
+                        "No puedo proponer una identificación respaldada por estas fuentes."
+                    )
+                else:
+                    resultado["mensaje"] += " Ninguna ficha coincide con la familia u orden y el tamaño indicados. ¿Puedes revisar esas pistas?"
                 return resultado
         # El catálogo es pequeño. Conserva todos los resultados para poder comparar
         # las fichas compatibles cuando la similitud semántica por sí sola sea baja.

@@ -4,7 +4,7 @@
 
 ## Casos y etiquetas
 
-`casos_robustez.json` incluye 26 casos: 10 de regresión (ejemplos originales y fallos ya conocidos), 12 de desarrollo y 4 de reserva. Los casos sintéticos proceden del propio catálogo; sus etiquetas requieren revisión humana y no son observaciones independientes. La reserva tampoco constituye una validación de campo. Los dos casos de torcaza cubren una comparación con otra especie y un historial sintético; el historial real del reporte no está disponible.
+`casos_robustez.json` incluye 30 casos: 14 de regresión (ejemplos originales y fallos ya conocidos), 12 de desarrollo y 4 de reserva. Los casos sintéticos proceden del propio catálogo; sus etiquetas requieren revisión humana y no son observaciones independientes. La reserva tampoco constituye una validación de campo. Los casos de torcaza cubren una comparación con otra especie y un historial sintético; el historial real del reporte no está disponible. Los dos casos de sinsonte exigen abstención porque la familia Mimidae no está representada en el catálogo actual, con y sin historial sintético. Los casos de Alaudidae comprueban la consulta con solo una familia y el cambio desde una observación anterior de Mimidae, sin heredar sus colores ni medidas.
 
 Para añadir un caso, conserva la descripción exacta, indica `id`, `grupo`, `origen`, `consulta` y `esperado` (ID del catálogo o `null` si no debería identificar). Documenta quién comprobó la especie y con qué fuente. Usa `historial` para reproducir una conversación, sin datos privados ni credenciales.
 
