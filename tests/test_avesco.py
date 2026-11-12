@@ -1,16 +1,26 @@
 import json
+from pathlib import Path
 from types import SimpleNamespace
 
 import httpx
 import pytest
 from openai import OpenAI
 
-from avesco.asistente import AsistenteAves, comparar
+from avesco.asistente import AsistenteAves, comparar, OPCIONES_TENTATIVAS
 from avesco.configuracion import Configuracion, NVIDIA_URL
-from avesco.consulta import extraer_atributos, extraer_tamano, filtrar_por_tamano
+from avesco.consulta import extraer_atributos, extraer_tamano, filtrar_por_tamano, filtrar_por_taxonomia
 from avesco.datos import Catalogo
 from avesco.indice import IndiceAves
 from avesco.modelos import ClienteNvidia, ErrorModelo
+
+
+DESCRIPCION_GALLINAZO = """es un ave rapaz carroñera de gran tamaño muy común en Colombia y en el continente americano.
+Características principales
+• Tamaño y peso: Mide cerca de 74 cm de longitud, con una envergadura de alas de 1.33 m a 1.67 m y un peso que ronda los 2 a 2.75 kg.
+• Plumaje: Es de color negro intenso o lustroso en la mayor parte del cuerpo. Al volar, se aprecian unas manchas blancas características en la parte inferior de las puntas de las alas.
+• Cabeza y cuello: No tienen plumas; su piel es de color gris oscuro o negro mate, de aspecto arrugado. Esta adaptación evita que se ensucie con la descomposición al alimentarse."""
+DESCRIPCION_SIRIRI = (Path(__file__).parent / "datos/siriri.txt").read_text(encoding="utf-8").strip()
+DESCRIPCION_TORCAZA = (Path(__file__).parent / "datos/torcaza.txt").read_text(encoding="utf-8").strip()
 
 
 @pytest.fixture(scope="module")
@@ -33,6 +43,13 @@ def config():
     ("Medía menos de 13 cm", None),
     ("Una medida de 13 cm y otra de 20 cm.", None),
     ("Medía de 23 a 21 cm.", None),
+    (DESCRIPCION_GALLINAZO, (59.2, 88.8)),
+    (DESCRIPCION_SIRIRI, (18, 22)),
+    ("Longitud: 74 cm. Envergadura: 1.33 m a 1.67 m.", (59.2, 88.8)),
+    ("Tiene una envergadura aproximada de 133 a 167 cm y una longitud de 74 cm.", (59.2, 88.8)),
+    ("Mide 1.5 m de envergadura y 74 cm de longitud.", (59.2, 88.8)),
+    ("Mide 74 cm de longitud y 150 cm de envergadura.", (59.2, 88.8)),
+    ("Envergadura de alas de 1.33 m a 1.67 m.", None),
 ])
 def test_medidas(consulta, esperado):
     assert extraer_tamano(consulta, 0.20) == esperado
@@ -65,6 +82,139 @@ def test_atributos(catalogo):
     coincidencias, diferencias = comparar(catalogo.aves["columba_livia"], atributos)
     assert coincidencias["colores_principales"] == ["gris"]
     assert not diferencias
+
+
+@pytest.mark.parametrize("descripcion", ["Ave carroñera", "Aves carroñeras", "Se alimenta de carroña"])
+def test_dieta_carronera(descripcion, catalogo):
+    assert extraer_atributos(descripcion, 0.2, catalogo.vocabularios).dieta == ["carroña"]
+
+
+def test_gallinazo_con_longitud_y_envergadura(config, catalogo):
+    def chat_json(_instrucciones, entrada):
+        if "vocabulario" in entrada:
+            return {"colores_principales": ["negro", "blanco"], "dieta": ["carroña"]}
+        return {"ids": ["coragyps_atratus"]}
+
+    def buscar(_texto, ids, top_k):
+        assert "coragyps_atratus" in ids
+        assert "milvago_chimachima" not in ids
+        assert "rupornis_magnirostris" not in ids
+        return [("nycticorax_nycticorax", 0.94), ("coragyps_atratus", 0.91)]
+
+    asistente = AsistenteAves(config, catalogo, SimpleNamespace(retrieve_relevant_chunks=buscar),
+                              SimpleNamespace(chat_json=chat_json))
+    respuesta = asistente.responder(DESCRIPCION_GALLINAZO)
+    assert respuesta["diagnostico"]["atributos"]["rango_tamano_cm"] == (59.2, 88.8)
+    assert respuesta["estado"] == "coincidencias"
+    assert respuesta["aves"][0]["id"] == "coragyps_atratus"
+    assert respuesta["aves"][0]["citas"]
+
+
+@pytest.mark.parametrize(("texto", "familia"), [
+    ("Es de la familia de los tiránidos.", "Tyrannidae"),
+    ("Pertenece a la familia Tyrannidae.", "Tyrannidae"),
+    ("Es un colibrí.", "Trochilidae"),
+])
+def test_taxonomia_explicita(texto, familia, catalogo):
+    ids, criterios = filtrar_por_taxonomia(catalogo.aves, texto, list(catalogo.aves))
+    assert ids
+    assert criterios["familia"] == [familia]
+    assert all(catalogo.aves[id_ave]["familia"] == familia for id_ave in ids)
+
+
+@pytest.mark.parametrize("texto", ["No es un colibrí.", "No pertenece a la familia de los tiránidos.", "Ave de vientre amarillo."])
+def test_no_inferir_taxonomia(texto, catalogo):
+    ids, criterios = filtrar_por_taxonomia(catalogo.aves, texto, list(catalogo.aves))
+    assert not criterios
+    assert len(ids) == 120
+
+
+def test_siriri_respeta_tamano_y_taxonomia(config, catalogo):
+    def chat_json(_instrucciones, entrada):
+        if "vocabulario" in entrada:
+            return {"colores_principales": ["gris", "amarillo"], "dieta": ["insectos"]}
+        return {"ids": ["tyrannus_melancholicus"]}
+
+    def buscar(_texto, ids, top_k):
+        assert "tyrannus_melancholicus" in ids
+        assert "sporophila_intermedia" not in ids
+        assert "colaptes_punctigula" not in ids
+        assert all(catalogo.aves[id_ave]["familia"] == "Tyrannidae" for id_ave in ids)
+        assert all(18 <= catalogo.aves[id_ave]["longitud_min_cm"] <= 22 for id_ave in ids)
+        return [("tyrannus_melancholicus", 0.91)]
+
+    asistente = AsistenteAves(config, catalogo, SimpleNamespace(retrieve_relevant_chunks=buscar),
+                              SimpleNamespace(chat_json=chat_json))
+    respuesta = asistente.responder(DESCRIPCION_SIRIRI)
+    assert respuesta["aves"][0]["id"] == "tyrannus_melancholicus"
+    assert respuesta["diagnostico"]["taxonomia_consultada"] == {
+        "familia": ["Tyrannidae"], "orden": ["Passeriformes"],
+    }
+
+
+def test_descripcion_nueva_no_hereda_medidas():
+    from app import reunir_pistas
+
+    historial = [{"role": "user", "content": "Vi un ave marrón de unos 12 cm."},
+                 {"role": "assistant", "content": OPCIONES_TENTATIVAS}]
+    texto = reunir_pistas(DESCRIPCION_SIRIRI, historial)
+    assert texto == DESCRIPCION_SIRIRI
+    assert extraer_tamano(texto, 0.2) == (18, 22)
+
+
+def test_aclaracion_breve_conserva_observacion():
+    from app import reunir_pistas
+
+    historial = [{"role": "user", "content": [{"type": "text", "text": "Vi un ave gris de 22 cm."}]},
+                 {"role": "assistant", "content": [{"type": "text", "text": OPCIONES_TENTATIVAS}]}]
+    texto = reunir_pistas("Tenía el vientre amarillo.", historial)
+    assert "gris de 22 cm" in texto
+    assert "vientre amarillo" in texto
+    assert extraer_tamano(texto, 0.2) == (17.6, 26.4)
+
+
+@pytest.mark.parametrize("rango", ["22 y 28", "22 y 36"])
+def test_nombre_en_comparacion_no_excluye_torcaza(config, catalogo, rango):
+    def chat_json(_instrucciones, entrada):
+        if "vocabulario" in entrada:
+            return {"colores_principales": ["gris"], "dieta": [], "entorno": [], "vuelo": []}
+        return {"ids": ["zenaida_auriculata"]}
+
+    def buscar(_texto, ids, top_k):
+        assert "zenaida_auriculata" in ids
+        assert "leptotila_verreauxi" in ids
+        assert all(catalogo.aves[i]["familia"] == "Columbidae" for i in ids)
+        return [("zenaida_auriculata", 0.95), ("leptotila_verreauxi", 0.91)]
+
+    asistente = AsistenteAves(config, catalogo, SimpleNamespace(retrieve_relevant_chunks=buscar),
+                              SimpleNamespace(chat_json=chat_json))
+    respuesta = asistente.responder(DESCRIPCION_TORCAZA.replace("22 y 28", rango))
+    assert respuesta["aves"][0]["id"] == "zenaida_auriculata"
+    assert respuesta["diagnostico"]["especies_despues_de_taxonomia"] >= 2
+
+
+def test_torcaza_datos_complementarios_citados(catalogo):
+    import hashlib
+    from avesco.configuracion import DATA
+
+    ave = catalogo.aves["zenaida_auriculata"]
+    assert "gris" in ave["colores_principales"]
+    assert "tonos grises" in catalogo.fichas[ave["id"]]["texto"]
+    citas = catalogo.citas(ave["id"], ["colores_principales", "descripcion_plumaje"])
+    assert any(c["url"].startswith("https://www.sag.gob.cl/") for c in citas)
+    assert catalogo.huella_fichas != hashlib.sha256((DATA / "processed/fichas_rag.jsonl").read_bytes()).hexdigest()
+    # Cada carga parte del catálogo base, sin duplicar el complemento.
+    recargado = Catalogo.cargar()
+    assert recargado.huella_fichas == catalogo.huella_fichas
+    assert recargado.aves[ave["id"]]["descripcion_plumaje"] == ave["descripcion_plumaje"]
+
+
+def test_torcaza_nueva_no_hereda_medida_anterior():
+    from app import reunir_pistas
+
+    historial = [{"role": "user", "content": "Era un ave de 12 cm."},
+                 {"role": "assistant", "content": OPCIONES_TENTATIVAS}]
+    assert reunir_pistas(DESCRIPCION_TORCAZA, historial) == DESCRIPCION_TORCAZA
 
 
 class ModeloPrueba:

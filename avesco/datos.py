@@ -23,6 +23,37 @@ def leer_jsonl(ruta: Path):
     return filas
 
 
+def aplicar_complementos(carpeta, aves, fichas, evidencias, fuentes, vocab):
+    """Añade rasgos documentados sin atribuirlos a las fuentes del catálogo base."""
+    ruta = carpeta / "complementos.json"
+    if not ruta.is_file():
+        return b""
+    contenido = ruta.read_bytes()
+    for cambio in json.loads(contenido)["complementos"]:
+        id_ave = cambio["id"]
+        if id_ave not in aves:
+            raise ValueError(f"Complemento de una especie desconocida: {id_ave}")
+        fuente = cambio["fuente"]
+        if fuente["id"] in fuentes and fuentes[fuente["id"]] != fuente:
+            raise ValueError(f"Fuente complementaria incompatible: {fuente['id']}")
+        colores = cambio["colores_adicionales"]
+        if not set(colores).issubset(vocab["colores_principales"]):
+            raise ValueError(f"Color complementario fuera del vocabulario: {id_ave}")
+        fuentes[fuente["id"]] = fuente
+        descripcion = cambio["descripcion_adicional"].strip()
+        if not descripcion:
+            raise ValueError(f"Descripción complementaria vacía: {id_ave}")
+        aves[id_ave]["colores_principales"] = list(dict.fromkeys([*aves[id_ave]["colores_principales"], *colores]))
+        aves[id_ave]["descripcion_plumaje"] = aves[id_ave]["descripcion_plumaje"].rstrip(".") + ". " + descripcion
+        fichas[id_ave]["texto"] += " Descripción complementaria: " + descripcion
+        for campo in ("colores_principales", "descripcion_plumaje"):
+            evidencias[id_ave]["campos"][campo].append({
+                "fuente_id": fuente["id"], "url": fuente["url"],
+                "localizador": cambio["localizador"], "evidencia": descripcion,
+            })
+    return contenido
+
+
 @dataclass
 class Catalogo:
     aves: dict
@@ -44,6 +75,7 @@ class Catalogo:
         with (carpeta / "fuentes.csv").open(encoding="utf-8-sig", newline="") as archivo:
             fuentes = {fila["id"]: fila for fila in csv.DictReader(archivo)}
         vocab = json.loads((carpeta / "vocabularios.json").read_text(encoding="utf-8"))
+        complementos = aplicar_complementos(carpeta, aves, fichas, evidencias, fuentes, vocab)
         for id_ave, ave in aves.items():
             bajo, alto = ave["longitud_min_cm"], ave["longitud_max_cm"]
             if not all(isinstance(x, (int, float)) and math.isfinite(x) for x in (bajo, alto)) or not 0 < bajo <= alto:
@@ -60,7 +92,7 @@ class Catalogo:
                     url = urlsplit(referencia["url"])
                     if referencia["fuente_id"] not in fuentes or url.scheme != "https" or not url.hostname:
                         raise ValueError(f"Cita inválida para {id_ave}.")
-        return cls(aves, fichas, evidencias, fuentes, vocab, hashlib.sha256(ruta_fichas.read_bytes()).hexdigest())
+        return cls(aves, fichas, evidencias, fuentes, vocab, hashlib.sha256(ruta_fichas.read_bytes() + complementos).hexdigest())
 
     def citas(self, id_ave, campos):
         """Devuelve las citas de los campos mostrados y agrupa páginas repetidas."""

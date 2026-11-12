@@ -3,7 +3,7 @@
 import re
 from dataclasses import asdict
 
-from avesco.consulta import CAMPOS, MEDIDA, extraer_atributos, extraer_tamano, filtrar_por_tamano, normalizar, tokens
+from avesco.consulta import CAMPOS, MEDIDA, extraer_atributos, extraer_tamano, filtrar_por_tamano, filtrar_por_taxonomia, normalizar, tokens
 
 NO_SE = "No puedo identificar el ave con la información disponible."
 OPCIONES_TENTATIVAS = "Estas son posibles opciones, con confianza baja."
@@ -166,12 +166,16 @@ class AsistenteAves:
 
         # La consulta semántica conserva la descripción. El tamaño se compara aparte.
         consulta = MEDIDA.sub(" ", texto_normalizado).strip()
-        elegibles = [id_ave for id_ave in candidatas_filtradas if not nombres or id_ave in nombres]
-        menciona_colibri = re.search(r"\bcolibri(?:es|s)?\b", texto_normalizado)
-        niega_colibri = re.search(r"\bno (?:era|es|parecia|vi) (?:un |una )?colibri\b", texto_normalizado)
-        if not nombres and menciona_colibri and not niega_colibri:
-            elegibles = [id_ave for id_ave in elegibles if self.catalogo.aves[id_ave]["familia"] == "Trochilidae"]
-            diagnostico["familia_consultada"] = "Trochilidae"
+        # Un nombre puede ser una comparación («más pequeña que Columba livia»).
+        # La mención orienta la búsqueda, pero no excluye otras especies compatibles.
+        elegibles = list(candidatas_filtradas)
+        elegibles, taxonomia = filtrar_por_taxonomia(self.catalogo.aves, texto, elegibles)
+        if taxonomia:
+            diagnostico["taxonomia_consultada"] = taxonomia
+            diagnostico["especies_despues_de_taxonomia"] = len(elegibles)
+            if not elegibles:
+                resultado["mensaje"] += " Ninguna ficha coincide con la familia u orden y el tamaño indicados. ¿Puedes revisar esas pistas?"
+                return resultado
         # El catálogo es pequeño. Conserva todos los resultados para poder comparar
         # las fichas compatibles cuando la similitud semántica por sí sola sea baja.
         recuperadas = self.indice.retrieve_relevant_chunks(consulta, elegibles, top_k=len(elegibles))

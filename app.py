@@ -7,6 +7,7 @@ import gradio as gr
 
 from avesco.asistente import AsistenteAves, ETIQUETAS_CAMPOS, NO_SE, OPCIONES_TENTATIVAS
 from avesco.configuracion import Configuracion
+from avesco.consulta import extraer_atributos
 from avesco.datos import Catalogo
 from avesco.indice import crear_indice
 from avesco.modelos import ErrorModelo
@@ -65,6 +66,11 @@ def texto_del_mensaje(mensaje):
 
 def reunir_pistas(mensaje, historial):
     """Reúne las pistas de la observación hasta que haya una identificación."""
+    actuales = extraer_atributos(mensaje, 0, {})
+    # Una descripción extensa con medida y colores propios inicia otra observación.
+    # Las respuestas breves a preguntas aclaratorias siguen acumulando pistas.
+    if len(mensaje) >= 240 and actuales.rango_tamano_cm and len(actuales.colores_principales) >= 2:
+        return mensaje
     pistas = [mensaje]
     for anterior, respuesta in zip(historial[-2::-2], historial[-1::-2]):
         if anterior["role"] != "user" or respuesta["role"] != "assistant":

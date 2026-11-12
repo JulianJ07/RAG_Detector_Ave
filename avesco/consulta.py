@@ -17,7 +17,7 @@ ALIAS = {
     "dieta": {
         "semillas": "semillas?|granos?|granivor[oa]", "insectos": "insectos?|moscas?|bichos?|insectivor[oa]",
         "frutas": "frut[oa]s?|bayas?|frugivor[oa]", "néctar": "nectar|nectarivor[oa]",
-        "peces": "peces|pescados?|piscivor[oa]", "carroña": "carrona",
+        "peces": "peces|pescados?|piscivor[oa]", "carroña": "carrona|carroner[oa]s?",
         "pequeños vertebrados": "pequenos vertebrados|ratones|lagartijas",
         "carnívoro": "carnivor[oa]", "omnívoro": "omnivor[oa]",
     },
@@ -73,7 +73,19 @@ def extraer_tamano(texto, tolerancia):
         despues = texto[m.end():]
         if re.search(r"(?:hasta|menos de|mas de|altitud de|envergadura de|distancia de|no media)\s*$", antes):
             continue
+        # La envergadura puede incluir «de alas de», «aproximada» o dos unidades.
+        # Se descarta esa medida, sin perder la longitud corporal de otra cláusula.
+        contexto = re.split(r"[,;\n!?]|\.(?!\d)", antes)[-1]
+        dimensiones = list(re.finditer(
+            r"\b(?:envergadura|altitud|distancia|longitud|largo|mide|media)\b", contexto,
+        ))
+        es_longitud = re.match(r"\s+(?:de\s+)?(?:longitud|largo)\b", despues)
+        if (dimensiones and dimensiones[-1][0] in {"envergadura", "altitud", "distancia"}
+                and not es_longitud):
+            continue
         if re.match(r"\s+(?:de (?:altura|envergadura|distancia)|sobre el nivel del mar|msnm)\b", despues):
+            continue
+        if re.match(r"\s+(?:de\s+)?(?:envergadura|distancia)\b", despues):
             continue
         medidas.append(m)
     if len(medidas) != 1:
@@ -129,3 +141,31 @@ def filtrar_por_tamano(aves, rango_tamano_cm):
         id_ave for id_ave, ave in aves.items()
         if ave["longitud_min_cm"] <= maximo and ave["longitud_max_cm"] >= minimo
     ]
+
+
+def filtrar_por_taxonomia(aves, texto, ids):
+    """Filtra solo familias y órdenes mencionados explícitamente en la descripción."""
+    texto = normalizar(texto)
+    alias = {
+        "familia": {"Tyrannidae": r"tiranidos?", "Trochilidae": r"colibri(?:es|s)?"},
+        "orden": {"Passeriformes": r"paseriformes?"},
+    }
+    criterios = {}
+    for campo in ("familia", "orden"):
+        mencionados = []
+        for taxon in sorted({ave[campo] for ave in aves.values()}):
+            patron = re.escape(normalizar(taxon))
+            if taxon in alias[campo]:
+                patron += "|" + alias[campo][taxon]
+            for m in re.finditer(rf"\b(?:{patron})\b", texto):
+                if re.search(
+                    r"\bno(?:\s+(?:es|son|era|eran|parecia|vi|pertenece|pertenecen|a|la|el|familia|de|los|las|un|una))*\s*$",
+                    texto[:m.start()],
+                ):
+                    continue
+                mencionados.append(taxon)
+                break
+        if mencionados:
+            criterios[campo] = mencionados
+    return ([id_ave for id_ave in ids
+             if all(aves[id_ave][campo] in valores for campo, valores in criterios.items())], criterios)
