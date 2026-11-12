@@ -6,18 +6,21 @@ from dataclasses import dataclass, field
 
 ALIAS = {
     "colores_principales": {
-        "negro": "negr[oa]s?|oscuro|oscuras|negruzc[oa]", "blanco": "blanc[oa]s?|blanquecin[oa]",
-        "gris": "gris(?:es|ace[oa])?", "marrón": "marron(?:es)?|pard[oa]s?|castan[oa]s?|cafes?",
+        "negro": "negr[oa]s?|oscur[oa]s?|negruzc[oa]s?", "blanco": "blanc[oa]s?|blanquecin[oa]s?|crema|beige",
+        "gris": "gris(?:es|ace[oa]s?)?|plomiz[oa]s?",
+        "marrón": "marron(?:es)?|pard[oa]s?|castan[oa]s?|cafes?|ruf[oa]s?",
         "rojo": "roj[oa]s?|rojiz[oa]s?|escarlata", "naranja": "naranjas?|anaranjad[oa]s?|canela",
         "amarillo": "amarill[oa]s?|amarillent[oa]s?|dorad[oa]s?",
-        "verde": "verdes?|olivace[oa]s?|oliva|olivaceo",
-        "azul": "azul(?:es|ad[oa]s?)?|turquesa", "violeta": "violetas?|morad[oa]s?|violace[oa]s?",
+        "verde": "verdes?|verdos[oa]s?|olivace[oa]s?|oliva",
+        "azul": "azul(?:es|ad[oa]s?)?|turquesa|celestes?", "violeta": "violetas?|morad[oa]s?|violace[oa]s?",
         "iridiscente": "iridiscentes?|reflejos",
     },
     "dieta": {
-        "semillas": "semillas?|granos?|granivor[oa]", "insectos": "insectos?|moscas?|bichos?|insectivor[oa]",
-        "frutas": "frut[oa]s?|bayas?|frugivor[oa]", "néctar": "nectar|nectarivor[oa]",
-        "peces": "peces|pescados?|piscivor[oa]", "carroña": "carrona",
+        "semillas": "semillas?|granos?|granivor[oa]",
+        "insectos": "insectos?|moscas?|bichos?|gusanos?|lombrices|lombriz|insectivor[oa]",
+        "frutas": "frut[oa]s?|bayas?|frugivor[oa]|bananos?|platanos?|papayas?|mangos?",
+        "néctar": "nectar|nectarivor[oa]",
+        "peces": "peces|pescados?|pescando|pescaba|piscivor[oa]", "carroña": "carrona",
         "pequeños vertebrados": "pequenos vertebrados|ratones|lagartijas",
         "carnívoro": "carnivor[oa]", "omnívoro": "omnivor[oa]",
     },
@@ -38,8 +41,9 @@ ALIAS = {
     },
 }
 CAMPOS = tuple(ALIAS)
+CAMPOS_VERIFICADOS = ("colores_principales", "dieta")
 NUMERO = r"\d{1,4}(?:[.,]\d+)?"
-UNIDAD = r"centimetros?|milimetros?|metros?|cm|mm|m"
+UNIDAD = r"centimetros?|milimetros?|metros?|pulgadas?|cms|cm|mm|m"
 MEDIDA = re.compile(
     rf"\b(?P<primera>{NUMERO})\s*(?:(?P<u1>{UNIDAD})\b\s*)?"
     rf"(?:(?:a|y|[-–—])\s*(?P<segunda>{NUMERO})\s*)?(?P<u2>{UNIDAD})\b"
@@ -61,6 +65,8 @@ def a_centimetros(numero, unidad):
         return valor * 100
     if unidad == "mm" or unidad.startswith("milimetro"):
         return valor / 10
+    if unidad.startswith("pulgada"):
+        return round(valor * 2.54, 6)
     return valor
 
 
@@ -106,6 +112,11 @@ def extraer_atributos(texto, tolerancia, vocabularios, extraidos=None):
             valores[campo] = list(dict.fromkeys(
                 permitidos[normalizar(v)] for v in datos_llm if isinstance(v, str) and normalizar(v) in permitidos
             ))
+            # Si el texto no menciona ningún color ni alimento, el modelo los completó por su cuenta.
+            if campo in CAMPOS_VERIFICADOS and not re.search(
+                rf"\b(?:{'|'.join(patrones.values())})\b", sin_tildes,
+            ):
+                valores[campo] = []
             continue
         valores[campo] = [
             etiqueta for etiqueta, patron in patrones.items()

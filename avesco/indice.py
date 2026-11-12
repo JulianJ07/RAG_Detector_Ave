@@ -70,7 +70,15 @@ class IndiceAves:
 
 def crear_indice(config, catalogo):
     modelo = ClienteNvidia(config)
-    indice = IndiceAves(catalogo, modelo, CACHE / "qdrant_nvidia")
+    try:
+        indice = IndiceAves(catalogo, modelo, CACHE / "qdrant_nvidia")
+    except RuntimeError as error:
+        if "already accessed" not in str(error):
+            raise
+        raise SystemExit(
+            "Otro proceso está usando el índice en .avesco/qdrant_nvidia. "
+            "Cierra la app (app.py) antes de evaluar o reconstruir el índice."
+        ) from None
     try:
         creado = indice.asegurar()
     except Exception:

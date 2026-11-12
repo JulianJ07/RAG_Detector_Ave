@@ -7,6 +7,7 @@ import gradio as gr
 
 from avesco.asistente import AsistenteAves, ETIQUETAS_CAMPOS, NO_SE, OPCIONES_TENTATIVAS
 from avesco.configuracion import Configuracion
+from avesco.consulta import extraer_atributos
 from avesco.datos import Catalogo
 from avesco.indice import crear_indice
 from avesco.modelos import ErrorModelo
@@ -63,15 +64,26 @@ def texto_del_mensaje(mensaje):
     return " ".join(bloque["text"] for bloque in contenido if bloque["type"] == "text")
 
 
+def es_complemento(mensaje):
+    """Un mensaje sin tamaño ni colores suele añadir detalles al ave anterior, no describir otra."""
+    atributos = extraer_atributos(mensaje, 0, {})
+    return atributos.rango_tamano_cm is None and not atributos.colores_principales
+
+
 def reunir_pistas(mensaje, historial):
-    """Reúne las pistas de la observación hasta que haya una identificación."""
+    """Reúne las pistas de la observación hasta que haya una identificación.
+    Después de una identificación, un complemento como «comía insectos» se suma a la descripción anterior."""
     pistas = [mensaje]
+    complemento = es_complemento(mensaje)
     for anterior, respuesta in zip(historial[-2::-2], historial[-1::-2]):
         if anterior["role"] != "user" or respuesta["role"] != "assistant":
             break
-        if not texto_del_mensaje(respuesta).startswith((NO_SE, OPCIONES_TENTATIVAS)):
+        sin_identificar = texto_del_mensaje(respuesta).startswith((NO_SE, OPCIONES_TENTATIVAS))
+        if not sin_identificar and not complemento:
             break
         pistas.append(texto_del_mensaje(anterior))
+        # Solo se encadena un complemento con la observación inmediatamente anterior.
+        complemento = False
     return "\n".join(reversed(pistas))
 
 

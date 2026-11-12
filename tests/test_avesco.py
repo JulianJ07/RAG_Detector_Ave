@@ -5,7 +5,8 @@ import httpx
 import pytest
 from openai import OpenAI
 
-from avesco.asistente import AsistenteAves, comparar
+from app import reunir_pistas
+from avesco.asistente import AsistenteAves, comparar, menciona_nombre
 from avesco.configuracion import Configuracion, NVIDIA_URL
 from avesco.consulta import extraer_atributos, extraer_tamano, filtrar_por_tamano
 from avesco.datos import Catalogo
@@ -33,6 +34,7 @@ def config():
     ("Medía menos de 13 cm", None),
     ("Una medida de 13 cm y otra de 20 cm.", None),
     ("Medía de 23 a 21 cm.", None),
+    ("Unas 10 pulgadas", (20.32, 30.48)),
 ])
 def test_medidas(consulta, esperado):
     assert extraer_tamano(consulta, 0.20) == esperado
@@ -56,7 +58,7 @@ def test_atributos(catalogo):
     assert atributos.colores_principales == ["gris"]
     assert atributos.vuelo == ["planeo"]
     assert atributos.entorno == ["parque_jardin"]
-    limpio = extraer_atributos("Vi un ave", 0.2, catalogo.vocabularios, {
+    limpio = extraer_atributos("Vi un ave azul", 0.2, catalogo.vocabularios, {
         "colores_principales": ["AZUL", "Azul", "inventado", 3],
         "rango_tamano_cm": [20, 22],
     })
@@ -65,6 +67,57 @@ def test_atributos(catalogo):
     coincidencias, diferencias = comparar(catalogo.aves["columba_livia"], atributos)
     assert coincidencias["colores_principales"] == ["gris"]
     assert not diferencias
+
+
+def test_rasgos_inventados_por_el_modelo(catalogo):
+    inventados = {"colores_principales": ["marrón", "blanco"], "dieta": ["insectos"], "entorno": ["parque_jardin"]}
+    atributos = extraer_atributos("Vi un Turdus fuscater en el parque.", 0.2, catalogo.vocabularios, inventados)
+    assert atributos.colores_principales == []
+    assert atributos.dieta == []
+    assert atributos.entorno == ["parque_jardin"]
+
+
+@pytest.mark.parametrize(("nombre", "texto", "esperado"), [
+    ("Mayo", "vi un ave amarilla en mayo", False),
+    ("Caravana", "paso una caravana de carros", False),
+    ("Caravana", "creo que era una caravana", True),
+    ("Gallinazo Común", "vi un gallinazo comun", True),
+    ("Turdus fuscater", "vi un turdus fuscater", True),
+])
+def test_nombres_que_son_palabras_comunes(nombre, texto, esperado):
+    assert menciona_nombre(nombre, texto) is esperado
+
+
+def test_sigue_sin_chat(config, catalogo):
+    def chat_json(*_):
+        raise ErrorModelo("NVIDIA limitó la solicitud.")
+
+    def buscar(_texto, ids, top_k):
+        return [("thraupis_episcopus", 0.91)]
+
+    asistente = AsistenteAves(config, catalogo, SimpleNamespace(retrieve_relevant_chunks=buscar),
+                              SimpleNamespace(chat_json=chat_json))
+    respuesta = asistente.responder("Era azul y comía fruta en un parque. Medía 16 cm.")
+    assert [a["id"] for a in respuesta["aves"]] == ["thraupis_episcopus"]
+    assert len(respuesta["diagnostico"]["avisos"]) == 2
+
+
+def test_tentativas_con_similitud_baja(config, catalogo):
+    def buscar(_texto, ids, top_k):
+        return [("cinclus_leucocephalus", config.umbral_similitud - 0.05)]
+
+    asistente = AsistenteAves(config, catalogo, SimpleNamespace(retrieve_relevant_chunks=buscar),
+                              SimpleNamespace(chat_json=lambda *_: None))
+    assert asistente.responder("Ave negra y blanca sobre el hielo de un lago.")["estado"] == "abstencion"
+
+
+def test_complemento_tras_identificacion():
+    historial = [
+        {"role": "user", "content": "Era rojo con alas negras, de unos 13 cm."},
+        {"role": "assistant", "content": "Estas son las coincidencias mejor respaldadas por las fichas."},
+    ]
+    assert reunir_pistas("Atrapaba insectos en un jardín.", historial).startswith("Era rojo")
+    assert reunir_pistas("Otra ave, azul de 16 cm.", historial) == "Otra ave, azul de 16 cm."
 
 
 class ModeloPrueba:

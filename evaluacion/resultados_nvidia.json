@@ -21,7 +21,7 @@
       "respuesta": {
         "estado": "coincidencias",
         "mensaje": "Estas son las coincidencias mejor respaldadas por las fichas.",
-        "nota": "El catálogo no documenta el tipo de vuelo. La comparación usa los demás rasgos.",
+        "nota": "",
         "aves": [
           {
             "id": "pyrocephalus_rubinus",
@@ -357,9 +357,7 @@
             "entorno": [
               "parque_jardin"
             ],
-            "vuelo": [
-              "aleteo_rapido_con_cernido"
-            ]
+            "vuelo": []
           },
           "especies_despues_del_filtro": 33
         }
@@ -678,7 +676,9 @@
         "diglossa_albilatera"
       ],
       "rag_top_3": [
-        "thraupis_episcopus"
+        "thraupis_episcopus",
+        "thraupis_palmarum",
+        "brotogeris_jugularis"
       ],
       "respuesta": {
         "estado": "coincidencias",
@@ -718,6 +718,88 @@
                 "titulo": "Registros de aves del Valle de Aburrá asociados al estudio de conectividad ecológica",
                 "url": "https://doi.org/10.15472/5rp8fn",
                 "localizador": "occurrence.txt · occurrenceID AMVA:CONECTIVIDAD_AVES:13972",
+                "campos": [
+                  "entorno"
+                ]
+              }
+            ]
+          },
+          {
+            "id": "thraupis_palmarum",
+            "nombre_comun": "Azulejo Palmero",
+            "nombre_cientifico": "Thraupis palmarum",
+            "plumaje": "Plumaje gris oliváceo con alas y cola más oscuras",
+            "tamano": "17 cm",
+            "similitud": 0.3796,
+            "coincidencias": [
+              "La medida de la ficha (17 cm) encaja con el rango de la consulta.",
+              "Coincide en colores (gris).",
+              "Coincide en dieta (frutas).",
+              "Coincide en entorno (parques o jardines)."
+            ],
+            "diferencias": [
+              "La ficha registra verde, gris y negro para colores. Queda por contrastar azul."
+            ],
+            "citas": [
+              {
+                "titulo": "Guía de las aves de Envigado, primera edición",
+                "url": "https://sao.org.co/wp-content/uploads/2023/12/Guia-de-las-aves-de-Envigado-02-Nov-23.pdf#page=334",
+                "localizador": "p. 332",
+                "campos": [
+                  "nombre_comun",
+                  "descripcion_plumaje",
+                  "longitud_min_cm",
+                  "longitud_max_cm",
+                  "colores_principales",
+                  "dieta",
+                  "entorno"
+                ]
+              },
+              {
+                "titulo": "Registros de aves del Valle de Aburrá asociados al estudio de conectividad ecológica",
+                "url": "https://doi.org/10.15472/5rp8fn",
+                "localizador": "occurrence.txt · occurrenceID AMVA:CONECTIVIDAD_AVES:13979",
+                "campos": [
+                  "entorno"
+                ]
+              }
+            ]
+          },
+          {
+            "id": "brotogeris_jugularis",
+            "nombre_comun": "Periquito Bronceado",
+            "nombre_cientifico": "Brotogeris jugularis",
+            "plumaje": "Plumaje verde con zona bronceada en el ala y plumas azuladas hacia su borde",
+            "tamano": "18.5 cm",
+            "similitud": 0.3333,
+            "coincidencias": [
+              "La medida de la ficha (18.5 cm) encaja con el rango de la consulta.",
+              "Coincide en colores (azul).",
+              "Coincide en dieta (frutas).",
+              "Coincide en entorno (parques o jardines)."
+            ],
+            "diferencias": [
+              "La ficha registra verde, azul y marrón para colores. Queda por contrastar gris."
+            ],
+            "citas": [
+              {
+                "titulo": "Guía de las aves de Envigado, primera edición",
+                "url": "https://sao.org.co/wp-content/uploads/2023/12/Guia-de-las-aves-de-Envigado-02-Nov-23.pdf#page=139",
+                "localizador": "p. 137",
+                "campos": [
+                  "nombre_comun",
+                  "descripcion_plumaje",
+                  "longitud_min_cm",
+                  "longitud_max_cm",
+                  "colores_principales",
+                  "dieta",
+                  "entorno"
+                ]
+              },
+              {
+                "titulo": "Registros de aves del Valle de Aburrá asociados al estudio de conectividad ecológica",
+                "url": "https://doi.org/10.15472/5rp8fn",
+                "localizador": "occurrence.txt · occurrenceID AMVA:CONECTIVIDAD_AVES:13990",
                 "campos": [
                   "entorno"
                 ]
@@ -1058,7 +1140,7 @@
       "respuesta": {
         "estado": "coincidencias",
         "mensaje": "El tamaño y los colores coinciden con estas fichas. Un detalle del pico o una marca del plumaje puede ayudar a distinguirlas.",
-        "nota": "El catálogo no documenta el tipo de vuelo. La comparación usa los demás rasgos.",
+        "nota": "",
         "aves": [
           {
             "id": "pitangus_sulphuratus",
@@ -1069,8 +1151,7 @@
             "similitud": 0.2447,
             "coincidencias": [
               "La medida de la ficha (22 cm) encaja con el rango de la consulta.",
-              "Coincide en colores (amarillo, negro y blanco).",
-              "Coincide en entorno (parques o jardines)."
+              "Coincide en colores (amarillo, negro y blanco)."
             ],
             "diferencias": [],
             "citas": [
@@ -1083,16 +1164,7 @@
                   "descripcion_plumaje",
                   "longitud_min_cm",
                   "longitud_max_cm",
-                  "colores_principales",
-                  "entorno"
-                ]
-              },
-              {
-                "titulo": "Registros de aves del Valle de Aburrá asociados al estudio de conectividad ecológica",
-                "url": "https://doi.org/10.15472/5rp8fn",
-                "localizador": "occurrence.txt · occurrenceID AMVA:CONECTIVIDAD_AVES:13973",
-                "campos": [
-                  "entorno"
+                  "colores_principales"
                 ]
               }
             ]
@@ -1138,9 +1210,6 @@
                   "amarillo",
                   "negro",
                   "blanco"
-                ],
-                "entorno": [
-                  "parque_jardin"
                 ]
               },
               "diferencias": {},
@@ -1167,21 +1236,12 @@
               "coincidencias": {
                 "colores_principales": [
                   "amarillo"
-                ],
-                "dieta": [
-                  "insectos"
-                ],
-                "entorno": [
-                  "parque_jardin"
                 ]
               },
               "diferencias": {
                 "colores_principales": [
                   "negro",
                   "blanco"
-                ],
-                "dieta": [
-                  "semillas"
                 ]
               },
               "umbral_aplicado": 0.26
@@ -1194,20 +1254,11 @@
                 "colores_principales": [
                   "amarillo",
                   "negro"
-                ],
-                "dieta": [
-                  "insectos"
-                ],
-                "entorno": [
-                  "matorral"
                 ]
               },
               "diferencias": {
                 "colores_principales": [
                   "blanco"
-                ],
-                "dieta": [
-                  "semillas"
                 ]
               },
               "umbral_aplicado": 0.26
@@ -1220,17 +1271,11 @@
                 "colores_principales": [
                   "negro",
                   "blanco"
-                ],
-                "dieta": [
-                  "insectos"
                 ]
               },
               "diferencias": {
                 "colores_principales": [
                   "amarillo"
-                ],
-                "dieta": [
-                  "semillas"
                 ]
               },
               "umbral_aplicado": 0.26
@@ -1242,21 +1287,12 @@
               "coincidencias": {
                 "colores_principales": [
                   "blanco"
-                ],
-                "dieta": [
-                  "insectos"
-                ],
-                "entorno": [
-                  "parque_jardin"
                 ]
               },
               "diferencias": {
                 "colores_principales": [
                   "amarillo",
                   "negro"
-                ],
-                "dieta": [
-                  "semillas"
                 ]
               },
               "umbral_aplicado": 0.26
@@ -1269,17 +1305,11 @@
                 "colores_principales": [
                   "negro",
                   "blanco"
-                ],
-                "dieta": [
-                  "insectos"
                 ]
               },
               "diferencias": {
                 "colores_principales": [
                   "amarillo"
-                ],
-                "dieta": [
-                  "semillas"
                 ]
               },
               "umbral_aplicado": 0.26
@@ -1292,18 +1322,11 @@
                 "colores_principales": [
                   "negro",
                   "blanco"
-                ],
-                "entorno": [
-                  "matorral"
                 ]
               },
               "diferencias": {
                 "colores_principales": [
                   "amarillo"
-                ],
-                "dieta": [
-                  "semillas",
-                  "insectos"
                 ]
               },
               "umbral_aplicado": 0.26
@@ -1319,17 +1342,9 @@
               "negro",
               "blanco"
             ],
-            "dieta": [
-              "semillas",
-              "insectos"
-            ],
-            "entorno": [
-              "parque_jardin",
-              "matorral"
-            ],
-            "vuelo": [
-              "aleteo_rapido_continuo"
-            ]
+            "dieta": [],
+            "entorno": [],
+            "vuelo": []
           },
           "especies_despues_del_filtro": 8
         }
@@ -1352,7 +1367,7 @@
       "respuesta": {
         "estado": "abstencion",
         "mensaje": "No puedo identificar el ave con la información disponible. Ninguna ficha coincide con esa medida. ¿Puedes revisar el tamaño aproximado?",
-        "nota": "El catálogo no documenta el tipo de vuelo. La comparación usa los demás rasgos.",
+        "nota": "",
         "aves": [],
         "diagnostico": {
           "modo": "nvidia",
@@ -1367,17 +1382,11 @@
               "negro",
               "blanco"
             ],
-            "dieta": [
-              "peces"
-            ],
+            "dieta": [],
             "entorno": [
-              "acuatico",
-              "humedal",
-              "rio_o_quebrada"
+              "humedal"
             ],
-            "vuelo": [
-              "planeo"
-            ]
+            "vuelo": []
           },
           "especies_despues_del_filtro": 0
         }

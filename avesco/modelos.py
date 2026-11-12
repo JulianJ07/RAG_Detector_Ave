@@ -47,7 +47,8 @@ class ClienteNvidia:
             {"role": "user", "content": json.dumps(entrada, ensure_ascii=False)},
         ]
         respuesta = self._llamar(
-            self.client.chat.completions.create, model=self.modelo_chat, messages=messages,
+            # El asistente puede seguir sin chat, así que no conviene esperar los 45 s de los embeddings.
+            self.client.with_options(timeout=20).chat.completions.create, model=self.modelo_chat, messages=messages,
             max_tokens=384, temperature=0, response_format={"type": "json_object"},
             extra_body={"chat_template_kwargs": {"enable_thinking": False}},
         )
