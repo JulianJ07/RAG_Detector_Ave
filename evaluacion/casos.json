@@ -1,0 +1,52 @@
+{
+  "calibracion": [
+    {
+      "tipo": "habitual",
+      "consulta": "Vi un ave de 35 a 38 cm en el parque. Tenía el pecho negro, la frente oscura y la panza blanca.",
+      "esperado": "vanellus_chilensis"
+    },
+    {
+      "tipo": "habitual",
+      "consulta": "Ave de aproximadamente 36 cm, gris, con reflejos violetas en el cuello y manchas blancas en las alas. Estaba en la ciudad.",
+      "esperado": "columba_livia"
+    },
+    {
+      "tipo": "vago",
+      "consulta": "Vi un ave pequeña.",
+      "esperado": null
+    },
+    {
+      "tipo": "contradictorio",
+      "consulta": "Ave de entre 100 y 106 cm, con el plumaje enteramente rojo. La vi en un humedal.",
+      "esperado": null
+    }
+  ],
+  "finales": [
+    {
+      "tipo": "habitual",
+      "consulta": "Vi un ave de unos 13 cm, roja con alas negras. Atrapaba insectos en un jardín.",
+      "esperado": "pyrocephalus_rubinus"
+    },
+    {
+      "tipo": "habitual",
+      "consulta": "En un humedal vi un ave de unos 33 cm con pecho azul violáceo y alas verdosas.",
+      "esperado": "porphyrio_martinica"
+    },
+    {
+      "tipo": "habitual",
+      "consulta": "En un parque vi un ave gris azulada con alas de azul más intenso. Era de unos 16 cm y comía frutas.",
+      "esperado": "thraupis_episcopus"
+    },
+    {
+      "tipo": "dato de la fuente",
+      "consulta": "Era de vientre amarillo y cabeza negra con ceja blanca. Medía entre 21 y 23 cm. ¿Qué coincidencia encaja con esa medida?",
+      "esperado": "pitangus_sulphuratus"
+    },
+    {
+      "tipo": "fuera del catálogo",
+      "consulta": "Vi un ave negra y blanca de entre 110 y 120 cm que caminaba erguida sobre el hielo. ¿Qué ave era?",
+      "esperado": null,
+      "referencia": "Caso de prueba inspirado en Aptenodytes forsteri, incluido en especies_fuera_del_dataset.csv."
+    }
+  ]
+}

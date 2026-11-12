@@ -1,0 +1,161 @@
+{
+  "especies": 120,
+  "duplicados": 0,
+  "rangos_invertidos": 0,
+  "especies_sin_fuente": 0,
+  "especies_sin_presencia_local": 0,
+  "palabras_fichas_min": 84,
+  "palabras_fichas_max": 123,
+  "nulos_por_campo": {
+    "id": {
+      "n": 0,
+      "porcentaje": 0.0
+    },
+    "nombre_comun": {
+      "n": 0,
+      "porcentaje": 0.0
+    },
+    "nombre_cientifico": {
+      "n": 0,
+      "porcentaje": 0.0
+    },
+    "orden": {
+      "n": 0,
+      "porcentaje": 0.0
+    },
+    "familia": {
+      "n": 0,
+      "porcentaje": 0.0
+    },
+    "longitud_min_cm": {
+      "n": 0,
+      "porcentaje": 0.0
+    },
+    "longitud_max_cm": {
+      "n": 0,
+      "porcentaje": 0.0
+    },
+    "colores_principales": {
+      "n": 0,
+      "porcentaje": 0.0
+    },
+    "descripcion_plumaje": {
+      "n": 0,
+      "porcentaje": 0.0
+    },
+    "dieta": {
+      "n": 0,
+      "porcentaje": 0.0
+    },
+    "dieta_detalle": {
+      "n": 0,
+      "porcentaje": 0.0
+    },
+    "vuelo": {
+      "n": 120,
+      "porcentaje": 100.0
+    },
+    "comportamiento_otro": {
+      "n": 0,
+      "porcentaje": 0.0
+    },
+    "entorno": {
+      "n": 0,
+      "porcentaje": 0.0
+    },
+    "altitud_min_m": {
+      "n": 0,
+      "porcentaje": 0.0
+    },
+    "altitud_max_m": {
+      "n": 0,
+      "porcentaje": 0.0
+    },
+    "departamentos_o_zonas": {
+      "n": 0,
+      "porcentaje": 0.0
+    },
+    "endemica_colombia": {
+      "n": 99,
+      "porcentaje": 82.5
+    },
+    "estado_uicn": {
+      "n": 2,
+      "porcentaje": 1.67
+    },
+    "vocalizacion": {
+      "n": 120,
+      "porcentaje": 100.0
+    },
+    "especies_similares": {
+      "n": 68,
+      "porcentaje": 56.67
+    },
+    "fuente_id": {
+      "n": 0,
+      "porcentaje": 0.0
+    },
+    "fuente_pagina_o_url": {
+      "n": 0,
+      "porcentaje": 0.0
+    },
+    "evidencia_corta": {
+      "n": 0,
+      "porcentaje": 0.0
+    },
+    "confianza": {
+      "n": 0,
+      "porcentaje": 0.0
+    },
+    "campos_inferidos": {
+      "n": 0,
+      "porcentaje": 0.0
+    }
+  },
+  "especies_por_orden": {
+    "Accipitriformes": 4,
+    "Apodiformes": 15,
+    "Caprimulgiformes": 1,
+    "Cathartiformes": 2,
+    "Charadriiformes": 2,
+    "Columbiformes": 6,
+    "Coraciiformes": 2,
+    "Cuculiformes": 3,
+    "Falconiformes": 2,
+    "Galliformes": 3,
+    "Gruiformes": 3,
+    "Nyctibiiformes": 1,
+    "Passeriformes": 51,
+    "Pelecaniformes": 5,
+    "Piciformes": 8,
+    "Psittaciformes": 6,
+    "Strigiformes": 2,
+    "Tinamiformes": 1,
+    "Trogoniformes": 3
+  },
+  "especies_por_entorno": {
+    "acuatico": 10,
+    "bosque": 44,
+    "bosque_humedo": 44,
+    "herbazal": 36,
+    "humedal": 8,
+    "matorral": 33,
+    "parque_jardin": 41,
+    "urbano": 53
+  },
+  "municipios_representados": [
+    "Barbosa",
+    "Bello",
+    "Caldas",
+    "Copacabana",
+    "Envigado",
+    "Girardota",
+    "Itagüí",
+    "La Estrella",
+    "Medellín",
+    "Sabaneta"
+  ],
+  "pares_de_similitud": 27,
+  "casos_fuera_del_dataset": 10,
+  "especies_muestra_manual": 15
+}

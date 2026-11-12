@@ -1,0 +1,7 @@
+/data/raw/*
+!/data/raw/.gitkeep
+__pycache__/
+.venv/
+.env
+.pytest_cache/
+/.avesco/

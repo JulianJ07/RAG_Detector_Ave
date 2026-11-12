@@ -1,0 +1,121 @@
+pagina,nombre_cientifico,tamano_cm,altitud_min_m,altitud_max_m,habitat_guia,gremio_guia,distribucion_guia,habito_guia
+32,Nothocercus julius,38,1800,3500,Bosque,Frugívora Granívora,Casi Endémica,Crepuscular y Diurno
+33,Chamaepetes goudotii,65 50,800,3300,Bosque,Frugívora,Residente,Diurno
+34,Ortalis columbiana,50 55,300,2000,Bosque,Frugívora,Endémica,Diurno
+35,Odontophorus hyperythrus,27,1300,2600,Bosque,Frugívora Granívora,Endémica,Diurno
+36,Columba livia,36,0,3500,Urbano,Omnívora,Introducida,Diurno
+37,Patagioenas fasciata,35,600,3500,Bosque,Frugívora Granívora,Residente,Diurno
+39,Leptotila verreauxi,28,0,2800,Bosque Matorral,Frugívora Granívora,Residente,Diurno
+40,Zentrygon linearis,29,1000,3000,Bosque,Granívora,Casi Endémica,Diurno
+41,Zenaida auriculata,26,0,3500,Urbano Herbazal,Granívora,Residente,Diurno
+42,Columbina talpacoti,18,0,2500,Urbano Herbazal,Granívora,Residente,Diurno
+43,Crotophaga major,46,0,2600,Matorral,Omnívora,Residente,Diurno
+44,Crotophaga ani,35,0,3000,Matorral,Insectívora,Residente,Diurno
+46,Piaya cayana,50,0,3000,Herbazal Bosque,Insectívora,Residente,Diurno
+48,Nyctibius griseus,38,0,2600,Bosque,Insectívora,Residente,Nocturno
+51,Nyctidromus albicollis,27,0,2300,Herbazal Matorral,Insectívora,Residente,Nocturno
+57,Phaethornis syrmatophorus,13,1000,3000,Bosque,Nectarívora,Residente,Diurno
+60,Colibri cyanotus,"9,3",600,3200,Bosque,Nectarívora,Residente,Diurno
+61,Colibri coruscans,13,1200,3600,Bosque,Nectarívora,Residente,Diurno
+62,Anthracothorax nigricollis,"10,5",0,2000,Urbano Matorral,Nectarívora,Residente,Diurno
+63,Heliangelus exortis,"9,5",2000,3200,Bosque,Nectarívora,Casi Endémica,Diurno
+64,Adelomyia melanogenys,"8,8",1000,3000,Bosque,Nectarívora,Residente,Diurno
+65,Aglaiocercus kingii,18,1600,3000,Bosque,Nectarívora,Residente,Diurno
+67,Haplophaedia aureliae,9,1500,2500,Bosque,Nectarívora,Casi Endémica,Diurno
+68,Coeligena coeligena,"10,7",1400,2600,Bosque,Nectarívora,Residente,Diurno
+69,Coeligena torquata,"11,4",2000,3400,Bosque,Nectarívora,Residente,Diurno
+72,Ocreatus underwoodii,12,1000,2700,Bosque,Nectarívora,Residente,Diurno
+75,Chlorostilbon melanorhynchus,"7,3",600,2200,Matorral,Nectarívora,Casi Endémica,Diurno
+77,Saucerottia saucerottei,"8,7",0,2100,Urbano Matorral,Nectarívora,Casi Endémica,Diurno
+78,Amazilia tzacatl,9,0,1900,Urbano,Nectarívora,Residente,Diurno
+79,Uranomitra franciae,9,1000,2100,Matorral Bosque,Nectarívora,Residente,Diurno
+80,Porphyrio martinica,33,0,3500,Acuático,Omnívora,Residente,Diurno
+81,Laterallus albigularis,15,0,2000,Acuática,Omnívora,Residente,Diurno
+82,Aramides cajaneus,35 40,0,2000,Acuática,Omnívora,Residente,Diurno
+83,Vanellus chilensis,37,0,3300,Herbazal,Omnívora,Residente,Diurno
+84,Tringa solitaria,"19,5",0,3500,Acuática,Insectívora,Migratoria Boreal,Diurno
+85,Nycticorax nycticorax,65,0,3200,Acuático,Insectívora Carnívora,Residente,Nocturno y Diurno
+86,Bubulcus ibis,55,0,3500,Herbazal Acuático,Omnívora,Residente,Diurno
+87,Ardea alba,85 105,0,3500,Acuático,Insectívora Carnívora,Residente,Diurno
+88,Egretta thula,60,0,3000,Acuático,Insectívora Carnívora,Residente,Diurno
+90,Phimosus infuscatus,55,0,3000,Urbano Herbazal,Insectívora,Residente,Diurno
+91,Coragyps atratus,65,0,4000,Urbano Herbazal,Omnívora,Residente,Diurno
+92,Cathartes aura,75,0,2600,Urbano Bosque,Omnívora,Residente,Diurno
+94,Elanus leucurus,40,0,3500,Herbazal,Carnívora,Residente,Diurno
+99,Rupornis magnirostris,33 40,0,2700,Urbano Herbazal,Carnívora,Residente,Diurno
+102,Buteo platypterus,42,0,3500,Bosque,Carnívora,Migratoria Boreal,Diurno
+103,Buteo brachyurus,45,0,3000,Bosque,Carnívora,Residente,Diurno
+107,Megascops choliba,23,0,2700,Urbano,Insectívora,Residente,Nocturno
+110,Asio clamator,36,0,2600,Urbano Matorral,Carnívora,Residente,Nocturno
+112,Pharomachrus auriceps,36,1200,2800,Bosque,Frugívora Insectívora,Residente,Diurno
+113,Trogon collaris,26,0,2500,Bosque,Frugívora Insectívora,Residente,Diurno
+114,Trogon personatus,25,1300,3000,Bosque,Frugívora Insectívora,Residente,Diurno
+115,Momotus aequatorialis,48,1300,3000,Urbano Matorral,Omnívora,Residente,Diurno
+116,Megaceryle torquata,40,0,3500,Acuático,Piscívora,Residente,Diurno
+117,Eubucco bourcierii,"15,5",900,2500,Bosque Matorral,Frugívora Insectívora,Residente,Diurno
+118,Aulacorhynchus albivitta,37,1500,3300,Bosque Matorral,Omnívora,Residente,Diurno
+120,Picumnus olivaceus,9,0,1800,Matorral Urbano,Frugívora Insectívora,Residente,Diurno
+121,Melanerpes formicivorus,23,1400,2700,Urbano Herbazal,Frugívora Insectívora,Residente,Diurno
+122,Melanerpes rubricapillus,18,0,2000,Urbano,Frugívora Insectívora,Residente,Diurno
+126,Dryocopus lineatus,33,0,2300,Urbano Herbazal,Insectívora,Residente,Diurno
+128,Colaptes rubiginosus,23,900,3000,Bosque Matorral,Frugívora Insectívora,Residente,Diurno
+129,Colaptes punctigula,20,0,1800,Urbano Herbazal,Frugívora Insectívora,Residente,Diurno
+132,Milvago chimachima,40 45,0,2700,Urbano Herbazal,Omnívora,Residente,Diurno
+133,Falco sparverius,30,0,3000,Urbano Herbazal,Insectívora Carnívora,Residente,Diurno
+137,Brotogeris jugularis,"18,5",0,1500,Urbano,Frugívora,Residente,Diurno
+139,Amazona ochrocephala,35 38,0,1500,Urbano,Frugívora,Residente,Diurno
+140,Amazona amazonica,31,0,1500,Urbano,Frugívora,Residente,Diurno
+141,Forpus conspicillatus,"12,5",0,2600,Urbano Matorral,Frugívora Granívora,Casi Endémica,Diurno
+142,Eupsittula pertinax,25,0,2600,Urbano Matorral,Frugívora,Residente,Diurno
+144,Ara severus,50,0,1500,Urbano,Frugívora,Residente,Diurno
+147,Thamnophilus multistriatus,16,0,2000,Matorral Urbano,Insectívora,Casi Endémica,Diurno
+149,Grallaria ruficapilla,19,1200,3200,Bosque,Insectívora,Residente,Diurno
+167,Synallaxis albescens,14,0,2000,Matorral,Insectívora,Residente,Diurno
+168,Synallaxis azarae,16,1300,3200,Matorral,Insectívora,Residente,Diurno
+182,Todirostrum cinereum,"9,5",0,2200,Matorral,Insectívora,Residente,Diurno
+186,Elaenia flavogaster,"16,5",0,2300,Matorral,Frugívora Insectívora,Residente,Diurno
+188,Elaenia frantzii,14,1000,3000,Matorral,Frugívora Insectívora,Residente,Diurno
+195,Pitangus sulphuratus,22,0,2600,Urbano Herbazal,Omnívora,Residente,Diurno
+197,Megarynchus pitangua,23,0,1500,Urbano,Omnívora,Residente,Diurno
+201,Myiozetetes cayanensis,17,0,2200,Urbano Herbazal,Insectívora,Residente,Diurno
+202,Tyrannus melancholicus,22,0,2800,Urbano Herbazal,Insectívora,Residente,Diurno
+210,Pyrocephalus rubinus,13,0,2700,Urbano Herbazal,Insectívora,Residente,Diurno
+213,Sayornis nigricans,16,200,2800,Urbano Herbazal,Insectívora,Residente,Diurno
+226,Cyanocorax yncas,26,600,3000,Bosque Matorral,Omnívora,Residente,Diurno
+227,Pygochelidon cyanoleuca,"12,5",0,3000,Urbano Herbazal,Insectívora,Residente,Diurno
+231,Troglodytes aedon,12,0,3300,Urbano Herbazal,Insectívora,Residente,Diurno
+236,Henicorhina leucophrys,11,1200,3000,Bosque,Insectívora,Residente,Diurno
+237,Cinclus leucocephalus,"15,5",1000,3800,Acuático,Insectívora,Residente,Diurno
+240,Catharus ustulatus,18,0,3000,Matorral Bosque,Frugívora Insectívora,Migratoria Boreal,Diurno
+242,Turdus ignobilis,23,0,2600,Urbano Herbazal,Frugívora Insectívora,Residente,Diurno
+243,Turdus fuscater,32,1700,4000,Urbano Herbazal,Omnívora,Residente,Diurno
+247,Spinus psaltria,10,500,3100,Herbazal,Granívora,Residente,Diurno
+250,Euphonia laniirostris,10,0,2000,Urbano Herbazal,Frugívora,Residente,Diurno
+251,Euphonia xanthogaster,10,0,2600,Bosque,Frugívora,Residente,Diurno
+255,Zonotrichia capensis,"12,5",0,3600,Urbano Herbazal,Granívora,Residente,Diurno
+264,Quiscalus lugubris,26,0,3000,Urbano Herbazal,Insectívora Granívora,Residente,Diurno
+265,Quiscalus mexicanus,43,0,200,Urbano Herbazal,Omnívora,Residente,Diurno
+266,Hypopyrrhus pyrohypogaster,31,1000,2800,Bosque,Frugívora Insectívora,Endémica,Diurno
+269,Mniotilta varia,13,0,2700,Urbano Bosque,Insectívora,Migratoria Boreal,Diurno
+275,Setophaga fusca,13,600,3500,Urbano Bosque,Insectívora,Migratoria Boreal,Diurno
+276,Setophaga petechia,"12,5",0,2700,Urbano,Insectívora,Migratoria Boreal,Diurno
+283,Myioborus miniatus,13,600,2700,Bosque,Insectívora,Residente,Diurno
+284,Myioborus ornatus,13,2000,3600,Bosque,Insectívora,Casi Endémica,Diurno
+292,Sicalis flaveola,"14,5",0,2600,Urbano Herbazal,Granívora,Residente,Diurno
+295,Diglossa albilatera,12,1400,3500,Bosque Matorral,Frugívora Nectarívora,Residente,Diurno
+298,Diglossa cyanea,15,1500,3500,Bosque,Frugívora Nectarívora,Residente,Diurno
+300,Ramphocelus dimidiatus,16,0,2200,Matorral Herbazal,Frugívora,Casi Endémico,Diurno
+301,Ramphocelus flammigerus,18,0,2200,Urbano Matorral,Frugívora,Residente,Diurno
+303,Sporophila intermedia,11,0,2300,Herbazal Matorral,Granívora,Residente,Diurno
+304,Sporophila nigricollis,10,0,2200,Herbazal,Granívora,Residente,Diurno
+305,Saltator maximus,21,0,1700,Matorral,Frugívora,Residente,Diurno
+308,Saltator striatipectus,"19,5",0,2500,Urbano Matorral,Frugívora,Residente,Diurno
+313,Coereba flaveola,11,0,2000,Urbano Herbazal,Nectarívora,Residente,Diurno
+322,Stilpnia heinei,13,1400,2300,Bosque,Frugívora,Residente,Diurno
+323,Stilpnia vitriolina,14,300,2500,Urbano Matorral,Frugívora,Casi Endémica,Diurno
+324,Stilpnia cyanicollis,12,700,2200,Urbano Matorral,Frugívora,Residente,Diurno
+326,Tangara nigroviridis,12,1100,3000,Bosque,Frugívora,Residente,Diurno
+328,Tangara gyrola,12,0,2200,Urbano Matorral,Frugívora,Residente,Diurno
+330,Tangara arthus,13,1200,2500,Bosque,Frugívora,Residente,Diurno
+331,Thraupis episcopus,16,0,2600,Urbano Herbazal,Frugívora,Residente,Diurno
+332,Thraupis palmarum,17,0,2600,Urbano Herbazal,Frugívora,Residente,Diurno

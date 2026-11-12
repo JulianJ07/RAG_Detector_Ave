@@ -1,0 +1,8 @@
+{
+  "colores_principales": ["negro", "blanco", "gris", "marrón", "rojo", "naranja", "amarillo", "verde", "azul", "violeta", "iridiscente"],
+  "dieta": ["semillas", "insectos", "frutas", "néctar", "peces", "carroña", "pequeños vertebrados", "carnívoro", "omnívoro"],
+  "vuelo": ["aleteo_rapido_con_cernido", "aleteo_rapido_continuo", "aleteo_lento", "vuelo_ondulado", "planeo", "vuelo_recto", "otro"],
+  "entorno": ["urbano", "urbano_edificaciones", "parque_jardin", "zona_agropecuaria", "bosque", "bosque_andino", "bosque_humedo", "matorral", "herbazal", "acuatico", "humedal", "rio_o_quebrada", "paramo"],
+  "estado_uicn": ["NE", "DD", "LC", "NT", "VU", "EN", "CR", "CR (PE)", "CR (PEW)", "EW", "EX"],
+  "confianza": ["alta", "media", "baja"]
+}

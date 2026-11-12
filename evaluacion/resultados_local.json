@@ -1,0 +1,1330 @@
+{
+  "modo": "local",
+  "conjunto": "finales",
+  "umbral": 0.8,
+  "aciertos_base": 2,
+  "aciertos_rag": 5,
+  "total": 5,
+  "casos": [
+    {
+      "tipo": "habitual",
+      "consulta": "Vi un ave de unos 13 cm, roja con alas negras. Atrapaba insectos en un jardín.",
+      "esperado": "pyrocephalus_rubinus",
+      "linea_base_top_3": [
+        "eubucco_bourcierii",
+        "ardea_alba",
+        "cathartes_aura"
+      ],
+      "rag_top_3": [
+        "pyrocephalus_rubinus"
+      ],
+      "respuesta": {
+        "estado": "coincidencias",
+        "mensaje": "Estas son las coincidencias mejor respaldadas por las fichas.",
+        "nota": "",
+        "aves": [
+          {
+            "id": "pyrocephalus_rubinus",
+            "nombre_comun": "Titiribí Pechirrojo",
+            "nombre_cientifico": "Pyrocephalus rubinus",
+            "plumaje": "Macho rojo vivo con alas oscuras. Hembra grisácea con pecho claro y vientre bajo anaranjado",
+            "tamano": "13 cm",
+            "similitud": 0.8021,
+            "coincidencias": [
+              "La medida de la ficha (13 cm) encaja con el rango de la consulta.",
+              "Coincide en colores (negro y rojo).",
+              "Coincide en dieta (insectos).",
+              "Coincide en entorno (parques o jardines)."
+            ],
+            "diferencias": [],
+            "citas": [
+              {
+                "titulo": "Guía de las aves de Envigado, primera edición",
+                "url": "https://sao.org.co/wp-content/uploads/2023/12/Guia-de-las-aves-de-Envigado-02-Nov-23.pdf#page=212",
+                "localizador": "p. 210",
+                "campos": [
+                  "nombre_comun",
+                  "descripcion_plumaje",
+                  "longitud_min_cm",
+                  "longitud_max_cm",
+                  "colores_principales",
+                  "dieta",
+                  "entorno"
+                ]
+              },
+              {
+                "titulo": "Registros de aves del Valle de Aburrá asociados al estudio de conectividad ecológica",
+                "url": "https://doi.org/10.15472/5rp8fn",
+                "localizador": "occurrence.txt · occurrenceID AMVA:CONECTIVIDAD_AVES:13975",
+                "campos": [
+                  "entorno"
+                ]
+              }
+            ]
+          }
+        ],
+        "diagnostico": {
+          "modo": "local",
+          "umbral": 0.8,
+          "candidatas": [
+            {
+              "id": "pyrocephalus_rubinus",
+              "similitud": 0.8021,
+              "apta": true,
+              "coincidencias": {
+                "colores_principales": [
+                  "negro",
+                  "rojo"
+                ],
+                "dieta": [
+                  "insectos"
+                ],
+                "entorno": [
+                  "parque_jardin"
+                ]
+              },
+              "diferencias": {}
+            },
+            {
+              "id": "forpus_conspicillatus",
+              "similitud": 0.7939,
+              "apta": false,
+              "coincidencias": {
+                "entorno": [
+                  "parque_jardin"
+                ]
+              },
+              "diferencias": {
+                "colores_principales": [
+                  "negro",
+                  "rojo"
+                ],
+                "dieta": [
+                  "insectos"
+                ]
+              }
+            },
+            {
+              "id": "synallaxis_albescens",
+              "similitud": 0.7932,
+              "apta": false,
+              "coincidencias": {
+                "dieta": [
+                  "insectos"
+                ]
+              },
+              "diferencias": {
+                "colores_principales": [
+                  "negro",
+                  "rojo"
+                ]
+              }
+            },
+            {
+              "id": "anthracothorax_nigricollis",
+              "similitud": 0.793,
+              "apta": false,
+              "coincidencias": {
+                "colores_principales": [
+                  "negro"
+                ],
+                "entorno": [
+                  "parque_jardin"
+                ]
+              },
+              "diferencias": {
+                "colores_principales": [
+                  "rojo"
+                ],
+                "dieta": [
+                  "insectos"
+                ]
+              }
+            },
+            {
+              "id": "stilpnia_vitriolina",
+              "similitud": 0.793,
+              "apta": false,
+              "coincidencias": {
+                "colores_principales": [
+                  "negro"
+                ],
+                "entorno": [
+                  "parque_jardin"
+                ]
+              },
+              "diferencias": {
+                "colores_principales": [
+                  "rojo"
+                ],
+                "dieta": [
+                  "insectos"
+                ]
+              }
+            },
+            {
+              "id": "setophaga_petechia",
+              "similitud": 0.7902,
+              "apta": false,
+              "coincidencias": {
+                "dieta": [
+                  "insectos"
+                ],
+                "entorno": [
+                  "parque_jardin"
+                ]
+              },
+              "diferencias": {
+                "colores_principales": [
+                  "negro",
+                  "rojo"
+                ]
+              }
+            },
+            {
+              "id": "stilpnia_cyanicollis",
+              "similitud": 0.79,
+              "apta": false,
+              "coincidencias": {
+                "colores_principales": [
+                  "negro"
+                ]
+              },
+              "diferencias": {
+                "colores_principales": [
+                  "rojo"
+                ],
+                "dieta": [
+                  "insectos"
+                ]
+              }
+            },
+            {
+              "id": "mniotilta_varia",
+              "similitud": 0.7898,
+              "apta": false,
+              "coincidencias": {
+                "colores_principales": [
+                  "negro"
+                ],
+                "dieta": [
+                  "insectos"
+                ]
+              },
+              "diferencias": {
+                "colores_principales": [
+                  "rojo"
+                ]
+              }
+            },
+            {
+              "id": "troglodytes_aedon",
+              "similitud": 0.7853,
+              "apta": false,
+              "coincidencias": {
+                "dieta": [
+                  "insectos"
+                ],
+                "entorno": [
+                  "parque_jardin"
+                ]
+              },
+              "diferencias": {
+                "colores_principales": [
+                  "negro",
+                  "rojo"
+                ]
+              }
+            },
+            {
+              "id": "myioborus_miniatus",
+              "similitud": 0.7848,
+              "apta": false,
+              "coincidencias": {
+                "colores_principales": [
+                  "negro"
+                ],
+                "dieta": [
+                  "insectos"
+                ]
+              },
+              "diferencias": {
+                "colores_principales": [
+                  "rojo"
+                ]
+              }
+            },
+            {
+              "id": "eubucco_bourcierii",
+              "similitud": 0.7845,
+              "apta": false,
+              "coincidencias": {
+                "colores_principales": [
+                  "rojo"
+                ],
+                "dieta": [
+                  "insectos"
+                ]
+              },
+              "diferencias": {
+                "colores_principales": [
+                  "negro"
+                ]
+              }
+            },
+            {
+              "id": "laterallus_albigularis",
+              "similitud": 0.7842,
+              "apta": false,
+              "coincidencias": {
+                "colores_principales": [
+                  "negro"
+                ]
+              },
+              "diferencias": {
+                "colores_principales": [
+                  "rojo"
+                ]
+              }
+            },
+            {
+              "id": "setophaga_fusca",
+              "similitud": 0.7837,
+              "apta": false,
+              "coincidencias": {
+                "colores_principales": [
+                  "negro"
+                ],
+                "dieta": [
+                  "insectos"
+                ]
+              },
+              "diferencias": {
+                "colores_principales": [
+                  "rojo"
+                ]
+              }
+            },
+            {
+              "id": "ocreatus_underwoodii",
+              "similitud": 0.7834,
+              "apta": false,
+              "coincidencias": {
+                "colores_principales": [
+                  "negro"
+                ]
+              },
+              "diferencias": {
+                "colores_principales": [
+                  "rojo"
+                ],
+                "dieta": [
+                  "insectos"
+                ]
+              }
+            }
+          ],
+          "atributos": {
+            "rango_tamano_cm": [
+              10.4,
+              15.6
+            ],
+            "colores_principales": [
+              "negro",
+              "rojo"
+            ],
+            "dieta": [
+              "insectos"
+            ],
+            "entorno": [
+              "parque_jardin"
+            ],
+            "vuelo": []
+          },
+          "especies_despues_del_filtro": 33
+        }
+      },
+      "acierto_base": false,
+      "acierto_rag": true,
+      "citas_del_catalogo": true
+    },
+    {
+      "tipo": "habitual",
+      "consulta": "En un humedal vi un ave de unos 33 cm con pecho azul violáceo y alas verdosas.",
+      "esperado": "porphyrio_martinica",
+      "linea_base_top_3": [
+        "porphyrio_martinica",
+        "eubucco_bourcierii",
+        "stilpnia_vitriolina"
+      ],
+      "rag_top_3": [
+        "porphyrio_martinica"
+      ],
+      "respuesta": {
+        "estado": "coincidencias",
+        "mensaje": "Estas son las coincidencias mejor respaldadas por las fichas.",
+        "nota": "",
+        "aves": [
+          {
+            "id": "porphyrio_martinica",
+            "nombre_comun": "Polla Azul",
+            "nombre_cientifico": "Porphyrio martinica",
+            "plumaje": "Cabeza y pecho azul violáceo con alas azul verdosas y blanco debajo de la cola",
+            "tamano": "33 cm",
+            "similitud": 0.8308,
+            "coincidencias": [
+              "La medida de la ficha (33 cm) encaja con el rango de la consulta.",
+              "Coincide en colores (azul y violeta).",
+              "Coincide en entorno (humedales)."
+            ],
+            "diferencias": [],
+            "citas": [
+              {
+                "titulo": "Guía de las aves de Envigado, primera edición",
+                "url": "https://sao.org.co/wp-content/uploads/2023/12/Guia-de-las-aves-de-Envigado-02-Nov-23.pdf#page=82",
+                "localizador": "p. 80",
+                "campos": [
+                  "nombre_comun",
+                  "descripcion_plumaje",
+                  "longitud_min_cm",
+                  "longitud_max_cm",
+                  "colores_principales",
+                  "entorno"
+                ]
+              },
+              {
+                "titulo": "Caracterización biótica de 8 humedales priorizados en el Valle de Aburrá, v1.2",
+                "url": "https://i2d.humboldt.org.co/resource?r=rrbb_animaliaplantae_amva_2022&v=1.2",
+                "localizador": "occurrence.txt · occurrenceID IAvH:GTB:AMVA:ANTOQUIA:PLANTAEANIMALIA:OBSERVACIONHUMANA:I2D-BIO_2022_120:2059",
+                "campos": [
+                  "entorno"
+                ]
+              }
+            ]
+          }
+        ],
+        "diagnostico": {
+          "modo": "local",
+          "umbral": 0.8,
+          "candidatas": [
+            {
+              "id": "porphyrio_martinica",
+              "similitud": 0.8308,
+              "apta": true,
+              "coincidencias": {
+                "colores_principales": [
+                  "azul",
+                  "violeta"
+                ],
+                "entorno": [
+                  "humedal"
+                ]
+              },
+              "diferencias": {}
+            },
+            {
+              "id": "crotophaga_ani",
+              "similitud": 0.8115,
+              "apta": false,
+              "coincidencias": {},
+              "diferencias": {
+                "colores_principales": [
+                  "azul",
+                  "violeta"
+                ]
+              }
+            },
+            {
+              "id": "aulacorhynchus_albivitta",
+              "similitud": 0.8092,
+              "apta": false,
+              "coincidencias": {},
+              "diferencias": {
+                "colores_principales": [
+                  "azul",
+                  "violeta"
+                ]
+              }
+            },
+            {
+              "id": "leptotila_verreauxi",
+              "similitud": 0.8077,
+              "apta": false,
+              "coincidencias": {},
+              "diferencias": {
+                "colores_principales": [
+                  "azul",
+                  "violeta"
+                ]
+              }
+            },
+            {
+              "id": "nyctidromus_albicollis",
+              "similitud": 0.8065,
+              "apta": false,
+              "coincidencias": {},
+              "diferencias": {
+                "colores_principales": [
+                  "azul",
+                  "violeta"
+                ]
+              }
+            },
+            {
+              "id": "dryocopus_lineatus",
+              "similitud": 0.8059,
+              "apta": false,
+              "coincidencias": {},
+              "diferencias": {
+                "colores_principales": [
+                  "azul",
+                  "violeta"
+                ]
+              }
+            },
+            {
+              "id": "odontophorus_hyperythrus",
+              "similitud": 0.8054,
+              "apta": false,
+              "coincidencias": {},
+              "diferencias": {
+                "colores_principales": [
+                  "azul",
+                  "violeta"
+                ]
+              }
+            },
+            {
+              "id": "pharomachrus_auriceps",
+              "similitud": 0.8028,
+              "apta": false,
+              "coincidencias": {},
+              "diferencias": {
+                "colores_principales": [
+                  "azul",
+                  "violeta"
+                ]
+              }
+            },
+            {
+              "id": "asio_clamator",
+              "similitud": 0.8019,
+              "apta": false,
+              "coincidencias": {},
+              "diferencias": {
+                "colores_principales": [
+                  "azul",
+                  "violeta"
+                ]
+              }
+            },
+            {
+              "id": "nothocercus_julius",
+              "similitud": 0.8014,
+              "apta": false,
+              "coincidencias": {},
+              "diferencias": {
+                "colores_principales": [
+                  "azul",
+                  "violeta"
+                ]
+              }
+            },
+            {
+              "id": "falco_sparverius",
+              "similitud": 0.8011,
+              "apta": false,
+              "coincidencias": {},
+              "diferencias": {
+                "colores_principales": [
+                  "azul",
+                  "violeta"
+                ]
+              }
+            },
+            {
+              "id": "hypopyrrhus_pyrohypogaster",
+              "similitud": 0.7978,
+              "apta": false,
+              "coincidencias": {},
+              "diferencias": {
+                "colores_principales": [
+                  "azul",
+                  "violeta"
+                ]
+              }
+            },
+            {
+              "id": "amazona_amazonica",
+              "similitud": 0.7967,
+              "apta": false,
+              "coincidencias": {
+                "colores_principales": [
+                  "azul"
+                ]
+              },
+              "diferencias": {
+                "colores_principales": [
+                  "violeta"
+                ]
+              }
+            },
+            {
+              "id": "nyctibius_griseus",
+              "similitud": 0.7966,
+              "apta": false,
+              "coincidencias": {},
+              "diferencias": {
+                "colores_principales": [
+                  "azul",
+                  "violeta"
+                ]
+              }
+            }
+          ],
+          "atributos": {
+            "rango_tamano_cm": [
+              26.4,
+              39.6
+            ],
+            "colores_principales": [
+              "azul",
+              "violeta"
+            ],
+            "dieta": [],
+            "entorno": [
+              "humedal"
+            ],
+            "vuelo": []
+          },
+          "especies_despues_del_filtro": 22
+        }
+      },
+      "acierto_base": true,
+      "acierto_rag": true,
+      "citas_del_catalogo": true
+    },
+    {
+      "tipo": "habitual",
+      "consulta": "En un parque vi un ave gris azulada con alas de azul más intenso. Era de unos 16 cm y comía frutas.",
+      "esperado": "thraupis_episcopus",
+      "linea_base_top_3": [
+        "thraupis_episcopus",
+        "thraupis_palmarum",
+        "diglossa_albilatera"
+      ],
+      "rag_top_3": [
+        "thraupis_episcopus",
+        "thraupis_palmarum",
+        "stilpnia_vitriolina"
+      ],
+      "respuesta": {
+        "estado": "coincidencias",
+        "mensaje": "Estas son las coincidencias mejor respaldadas por las fichas.",
+        "nota": "",
+        "aves": [
+          {
+            "id": "thraupis_episcopus",
+            "nombre_comun": "Azulejo Común",
+            "nombre_cientifico": "Thraupis episcopus",
+            "plumaje": "Cabeza y pecho gris azul pálido con alas azules más intensas",
+            "tamano": "16 cm",
+            "similitud": 0.8428,
+            "coincidencias": [
+              "La medida de la ficha (16 cm) encaja con el rango de la consulta.",
+              "Coincide en colores (gris y azul).",
+              "Coincide en dieta (frutas).",
+              "Coincide en entorno (parques o jardines)."
+            ],
+            "diferencias": [],
+            "citas": [
+              {
+                "titulo": "Guía de las aves de Envigado, primera edición",
+                "url": "https://sao.org.co/wp-content/uploads/2023/12/Guia-de-las-aves-de-Envigado-02-Nov-23.pdf#page=333",
+                "localizador": "p. 331",
+                "campos": [
+                  "nombre_comun",
+                  "descripcion_plumaje",
+                  "longitud_min_cm",
+                  "longitud_max_cm",
+                  "colores_principales",
+                  "dieta",
+                  "entorno"
+                ]
+              },
+              {
+                "titulo": "Registros de aves del Valle de Aburrá asociados al estudio de conectividad ecológica",
+                "url": "https://doi.org/10.15472/5rp8fn",
+                "localizador": "occurrence.txt · occurrenceID AMVA:CONECTIVIDAD_AVES:13972",
+                "campos": [
+                  "entorno"
+                ]
+              }
+            ]
+          },
+          {
+            "id": "thraupis_palmarum",
+            "nombre_comun": "Azulejo Palmero",
+            "nombre_cientifico": "Thraupis palmarum",
+            "plumaje": "Plumaje gris oliváceo con alas y cola más oscuras",
+            "tamano": "17 cm",
+            "similitud": 0.8267,
+            "coincidencias": [
+              "La medida de la ficha (17 cm) encaja con el rango de la consulta.",
+              "Coincide en colores (gris).",
+              "Coincide en dieta (frutas).",
+              "Coincide en entorno (parques o jardines)."
+            ],
+            "diferencias": [
+              "La ficha registra verde, gris y negro para colores. Queda por contrastar azul."
+            ],
+            "citas": [
+              {
+                "titulo": "Guía de las aves de Envigado, primera edición",
+                "url": "https://sao.org.co/wp-content/uploads/2023/12/Guia-de-las-aves-de-Envigado-02-Nov-23.pdf#page=334",
+                "localizador": "p. 332",
+                "campos": [
+                  "nombre_comun",
+                  "descripcion_plumaje",
+                  "longitud_min_cm",
+                  "longitud_max_cm",
+                  "colores_principales",
+                  "dieta",
+                  "entorno"
+                ]
+              },
+              {
+                "titulo": "Registros de aves del Valle de Aburrá asociados al estudio de conectividad ecológica",
+                "url": "https://doi.org/10.15472/5rp8fn",
+                "localizador": "occurrence.txt · occurrenceID AMVA:CONECTIVIDAD_AVES:13979",
+                "campos": [
+                  "entorno"
+                ]
+              }
+            ]
+          },
+          {
+            "id": "stilpnia_vitriolina",
+            "nombre_comun": "Tangara Rastrojera",
+            "nombre_cientifico": "Stilpnia vitriolina",
+            "plumaje": "Corona canela anaranjada y máscara oscura con alas azul verdosas y vientre claro",
+            "tamano": "14 cm",
+            "similitud": 0.8134,
+            "coincidencias": [
+              "La medida de la ficha (14 cm) encaja con el rango de la consulta.",
+              "Coincide en colores (azul).",
+              "Coincide en dieta (frutas).",
+              "Coincide en entorno (parques o jardines)."
+            ],
+            "diferencias": [
+              "La ficha registra naranja, azul, verde, negro y blanco para colores. Queda por contrastar gris."
+            ],
+            "citas": [
+              {
+                "titulo": "Guía de las aves de Envigado, primera edición",
+                "url": "https://sao.org.co/wp-content/uploads/2023/12/Guia-de-las-aves-de-Envigado-02-Nov-23.pdf#page=325",
+                "localizador": "p. 323",
+                "campos": [
+                  "nombre_comun",
+                  "descripcion_plumaje",
+                  "longitud_min_cm",
+                  "longitud_max_cm",
+                  "colores_principales",
+                  "dieta",
+                  "entorno"
+                ]
+              },
+              {
+                "titulo": "Registros de aves del Valle de Aburrá asociados al estudio de conectividad ecológica",
+                "url": "https://doi.org/10.15472/5rp8fn",
+                "localizador": "occurrence.txt · occurrenceID AMVA:CONECTIVIDAD_AVES:19719",
+                "campos": [
+                  "entorno"
+                ]
+              }
+            ]
+          }
+        ],
+        "diagnostico": {
+          "modo": "local",
+          "umbral": 0.8,
+          "candidatas": [
+            {
+              "id": "thraupis_episcopus",
+              "similitud": 0.8428,
+              "apta": true,
+              "coincidencias": {
+                "colores_principales": [
+                  "gris",
+                  "azul"
+                ],
+                "dieta": [
+                  "frutas"
+                ],
+                "entorno": [
+                  "parque_jardin"
+                ]
+              },
+              "diferencias": {}
+            },
+            {
+              "id": "thraupis_palmarum",
+              "similitud": 0.8267,
+              "apta": true,
+              "coincidencias": {
+                "colores_principales": [
+                  "gris"
+                ],
+                "dieta": [
+                  "frutas"
+                ],
+                "entorno": [
+                  "parque_jardin"
+                ]
+              },
+              "diferencias": {
+                "colores_principales": [
+                  "azul"
+                ]
+              }
+            },
+            {
+              "id": "myiozetetes_cayanensis",
+              "similitud": 0.8223,
+              "apta": false,
+              "coincidencias": {
+                "entorno": [
+                  "parque_jardin"
+                ]
+              },
+              "diferencias": {
+                "colores_principales": [
+                  "gris",
+                  "azul"
+                ],
+                "dieta": [
+                  "frutas"
+                ]
+              }
+            },
+            {
+              "id": "diglossa_cyanea",
+              "similitud": 0.8183,
+              "apta": true,
+              "coincidencias": {
+                "colores_principales": [
+                  "azul"
+                ],
+                "dieta": [
+                  "frutas"
+                ]
+              },
+              "diferencias": {
+                "colores_principales": [
+                  "gris"
+                ]
+              }
+            },
+            {
+              "id": "ramphocelus_dimidiatus",
+              "similitud": 0.8156,
+              "apta": false,
+              "coincidencias": {
+                "dieta": [
+                  "frutas"
+                ]
+              },
+              "diferencias": {
+                "colores_principales": [
+                  "gris",
+                  "azul"
+                ]
+              }
+            },
+            {
+              "id": "elaenia_flavogaster",
+              "similitud": 0.8155,
+              "apta": false,
+              "coincidencias": {
+                "dieta": [
+                  "frutas"
+                ],
+                "entorno": [
+                  "parque_jardin"
+                ]
+              },
+              "diferencias": {
+                "colores_principales": [
+                  "gris",
+                  "azul"
+                ]
+              }
+            },
+            {
+              "id": "pyrocephalus_rubinus",
+              "similitud": 0.8149,
+              "apta": false,
+              "coincidencias": {
+                "colores_principales": [
+                  "gris"
+                ],
+                "entorno": [
+                  "parque_jardin"
+                ]
+              },
+              "diferencias": {
+                "colores_principales": [
+                  "azul"
+                ],
+                "dieta": [
+                  "frutas"
+                ]
+              }
+            },
+            {
+              "id": "stilpnia_vitriolina",
+              "similitud": 0.8134,
+              "apta": true,
+              "coincidencias": {
+                "colores_principales": [
+                  "azul"
+                ],
+                "dieta": [
+                  "frutas"
+                ],
+                "entorno": [
+                  "parque_jardin"
+                ]
+              },
+              "diferencias": {
+                "colores_principales": [
+                  "gris"
+                ]
+              }
+            },
+            {
+              "id": "brotogeris_jugularis",
+              "similitud": 0.8127,
+              "apta": true,
+              "coincidencias": {
+                "colores_principales": [
+                  "azul"
+                ],
+                "dieta": [
+                  "frutas"
+                ],
+                "entorno": [
+                  "parque_jardin"
+                ]
+              },
+              "diferencias": {
+                "colores_principales": [
+                  "gris"
+                ]
+              }
+            },
+            {
+              "id": "stilpnia_heinei",
+              "similitud": 0.8112,
+              "apta": true,
+              "coincidencias": {
+                "colores_principales": [
+                  "azul"
+                ],
+                "dieta": [
+                  "frutas"
+                ]
+              },
+              "diferencias": {
+                "colores_principales": [
+                  "gris"
+                ]
+              }
+            },
+            {
+              "id": "aglaiocercus_kingii",
+              "similitud": 0.8107,
+              "apta": false,
+              "coincidencias": {
+                "colores_principales": [
+                  "azul"
+                ]
+              },
+              "diferencias": {
+                "colores_principales": [
+                  "gris"
+                ],
+                "dieta": [
+                  "frutas"
+                ]
+              }
+            },
+            {
+              "id": "synallaxis_azarae",
+              "similitud": 0.8091,
+              "apta": false,
+              "coincidencias": {
+                "colores_principales": [
+                  "gris"
+                ]
+              },
+              "diferencias": {
+                "colores_principales": [
+                  "azul"
+                ],
+                "dieta": [
+                  "frutas"
+                ]
+              }
+            },
+            {
+              "id": "myioborus_miniatus",
+              "similitud": 0.808,
+              "apta": false,
+              "coincidencias": {
+                "colores_principales": [
+                  "gris"
+                ]
+              },
+              "diferencias": {
+                "colores_principales": [
+                  "azul"
+                ],
+                "dieta": [
+                  "frutas"
+                ]
+              }
+            },
+            {
+              "id": "thamnophilus_multistriatus",
+              "similitud": 0.8077,
+              "apta": false,
+              "coincidencias": {},
+              "diferencias": {
+                "colores_principales": [
+                  "gris",
+                  "azul"
+                ],
+                "dieta": [
+                  "frutas"
+                ]
+              }
+            }
+          ],
+          "atributos": {
+            "rango_tamano_cm": [
+              12.8,
+              19.2
+            ],
+            "colores_principales": [
+              "gris",
+              "azul"
+            ],
+            "dieta": [
+              "frutas"
+            ],
+            "entorno": [
+              "parque_jardin"
+            ],
+            "vuelo": []
+          },
+          "especies_despues_del_filtro": 32
+        }
+      },
+      "acierto_base": true,
+      "acierto_rag": true,
+      "citas_del_catalogo": true
+    },
+    {
+      "tipo": "dato de la fuente",
+      "consulta": "Era de vientre amarillo y cabeza negra con ceja blanca. Medía entre 21 y 23 cm. ¿Qué coincidencia encaja con esa medida?",
+      "esperado": "pitangus_sulphuratus",
+      "linea_base_top_3": [
+        "coereba_flaveola",
+        "myiozetetes_cayanensis",
+        "megarynchus_pitangua"
+      ],
+      "rag_top_3": [
+        "megarynchus_pitangua",
+        "pitangus_sulphuratus",
+        "saltator_maximus"
+      ],
+      "respuesta": {
+        "estado": "coincidencias",
+        "mensaje": "Estas son las coincidencias mejor respaldadas por las fichas.",
+        "nota": "",
+        "aves": [
+          {
+            "id": "megarynchus_pitangua",
+            "nombre_comun": "Bichofué Picudo",
+            "nombre_cientifico": "Megarynchus pitangua",
+            "plumaje": "Cabeza oscura con ceja clara y garganta pálida. Vientre amarillo bajo alas pardas",
+            "tamano": "23 cm",
+            "similitud": 0.824,
+            "coincidencias": [
+              "La medida de la ficha (23 cm) encaja con el rango de la consulta.",
+              "Coincide en colores (negro, blanco y amarillo)."
+            ],
+            "diferencias": [],
+            "citas": [
+              {
+                "titulo": "Guía de las aves de Envigado, primera edición",
+                "url": "https://sao.org.co/wp-content/uploads/2023/12/Guia-de-las-aves-de-Envigado-02-Nov-23.pdf#page=199",
+                "localizador": "p. 197",
+                "campos": [
+                  "nombre_comun",
+                  "descripcion_plumaje",
+                  "longitud_min_cm",
+                  "longitud_max_cm",
+                  "colores_principales"
+                ]
+              }
+            ]
+          },
+          {
+            "id": "pitangus_sulphuratus",
+            "nombre_comun": "Bichofué Común",
+            "nombre_cientifico": "Pitangus sulphuratus",
+            "plumaje": "Cabeza de franjas negras y blancas con garganta blanca. Vientre amarillo y dorso pardo",
+            "tamano": "22 cm",
+            "similitud": 0.8031,
+            "coincidencias": [
+              "La medida de la ficha (22 cm) encaja con el rango de la consulta.",
+              "Coincide en colores (negro, blanco y amarillo)."
+            ],
+            "diferencias": [],
+            "citas": [
+              {
+                "titulo": "Guía de las aves de Envigado, primera edición",
+                "url": "https://sao.org.co/wp-content/uploads/2023/12/Guia-de-las-aves-de-Envigado-02-Nov-23.pdf#page=197",
+                "localizador": "p. 195",
+                "campos": [
+                  "nombre_comun",
+                  "descripcion_plumaje",
+                  "longitud_min_cm",
+                  "longitud_max_cm",
+                  "colores_principales"
+                ]
+              }
+            ]
+          },
+          {
+            "id": "saltator_maximus",
+            "nombre_comun": "Saltador Ajicero",
+            "nombre_cientifico": "Saltator maximus",
+            "plumaje": "Dorso verde oliva y pecho gris con ceja blanca y marcas oscuras a los lados de la garganta",
+            "tamano": "21 cm",
+            "similitud": 0.8062,
+            "coincidencias": [
+              "La medida de la ficha (21 cm) encaja con el rango de la consulta.",
+              "Coincide en colores (negro y blanco)."
+            ],
+            "diferencias": [
+              "La ficha registra verde, gris, blanco y negro para colores. Queda por contrastar amarillo."
+            ],
+            "citas": [
+              {
+                "titulo": "Guía de las aves de Envigado, primera edición",
+                "url": "https://sao.org.co/wp-content/uploads/2023/12/Guia-de-las-aves-de-Envigado-02-Nov-23.pdf#page=307",
+                "localizador": "p. 305",
+                "campos": [
+                  "nombre_comun",
+                  "descripcion_plumaje",
+                  "longitud_min_cm",
+                  "longitud_max_cm",
+                  "colores_principales"
+                ]
+              }
+            ]
+          }
+        ],
+        "diagnostico": {
+          "modo": "local",
+          "umbral": 0.8,
+          "candidatas": [
+            {
+              "id": "megarynchus_pitangua",
+              "similitud": 0.824,
+              "apta": true,
+              "coincidencias": {
+                "colores_principales": [
+                  "negro",
+                  "blanco",
+                  "amarillo"
+                ]
+              },
+              "diferencias": {}
+            },
+            {
+              "id": "saltator_maximus",
+              "similitud": 0.8062,
+              "apta": true,
+              "coincidencias": {
+                "colores_principales": [
+                  "negro",
+                  "blanco"
+                ]
+              },
+              "diferencias": {
+                "colores_principales": [
+                  "amarillo"
+                ]
+              }
+            },
+            {
+              "id": "turdus_ignobilis",
+              "similitud": 0.8033,
+              "apta": true,
+              "coincidencias": {
+                "colores_principales": [
+                  "blanco"
+                ]
+              },
+              "diferencias": {
+                "colores_principales": [
+                  "negro",
+                  "amarillo"
+                ]
+              }
+            },
+            {
+              "id": "pitangus_sulphuratus",
+              "similitud": 0.8031,
+              "apta": true,
+              "coincidencias": {
+                "colores_principales": [
+                  "negro",
+                  "blanco",
+                  "amarillo"
+                ]
+              },
+              "diferencias": {}
+            },
+            {
+              "id": "megascops_choliba",
+              "similitud": 0.7999,
+              "apta": false,
+              "coincidencias": {
+                "colores_principales": [
+                  "negro",
+                  "blanco"
+                ]
+              },
+              "diferencias": {
+                "colores_principales": [
+                  "amarillo"
+                ]
+              }
+            },
+            {
+              "id": "tyrannus_melancholicus",
+              "similitud": 0.7976,
+              "apta": false,
+              "coincidencias": {
+                "colores_principales": [
+                  "amarillo"
+                ]
+              },
+              "diferencias": {
+                "colores_principales": [
+                  "negro",
+                  "blanco"
+                ]
+              }
+            },
+            {
+              "id": "melanerpes_formicivorus",
+              "similitud": 0.7919,
+              "apta": false,
+              "coincidencias": {
+                "colores_principales": [
+                  "negro",
+                  "blanco"
+                ]
+              },
+              "diferencias": {
+                "colores_principales": [
+                  "amarillo"
+                ]
+              }
+            },
+            {
+              "id": "colaptes_rubiginosus",
+              "similitud": 0.7909,
+              "apta": false,
+              "coincidencias": {
+                "colores_principales": [
+                  "negro",
+                  "amarillo"
+                ]
+              },
+              "diferencias": {
+                "colores_principales": [
+                  "blanco"
+                ]
+              }
+            }
+          ],
+          "atributos": {
+            "rango_tamano_cm": [
+              21.0,
+              23.0
+            ],
+            "colores_principales": [
+              "negro",
+              "blanco",
+              "amarillo"
+            ],
+            "dieta": [],
+            "entorno": [],
+            "vuelo": []
+          },
+          "especies_despues_del_filtro": 8
+        }
+      },
+      "acierto_base": false,
+      "acierto_rag": true,
+      "citas_del_catalogo": true
+    },
+    {
+      "tipo": "fuera del catálogo",
+      "consulta": "Vi un ave negra y blanca de entre 110 y 120 cm que caminaba erguida sobre el hielo. ¿Qué ave era?",
+      "esperado": null,
+      "referencia": "Caso de prueba inspirado en Aptenodytes forsteri, incluido en especies_fuera_del_dataset.csv.",
+      "linea_base_top_3": [
+        "anthracothorax_nigricollis",
+        "aramides_cajaneus",
+        "chamaepetes_goudotii"
+      ],
+      "rag_top_3": [],
+      "respuesta": {
+        "estado": "abstencion",
+        "mensaje": "No puedo identificar el ave con la información disponible. Ninguna ficha coincide con esa medida. ¿Puedes revisar el tamaño aproximado?",
+        "nota": "",
+        "aves": [],
+        "diagnostico": {
+          "modo": "local",
+          "umbral": 0.8,
+          "candidatas": [],
+          "atributos": {
+            "rango_tamano_cm": [
+              110.0,
+              120.0
+            ],
+            "colores_principales": [
+              "negro",
+              "blanco"
+            ],
+            "dieta": [],
+            "entorno": [],
+            "vuelo": []
+          },
+          "especies_despues_del_filtro": 0
+        }
+      },
+      "acierto_base": false,
+      "acierto_rag": true,
+      "citas_del_catalogo": null
+    }
+  ]
+}
