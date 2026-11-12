@@ -36,7 +36,7 @@ La selección tiene un sesgo de cobertura hacia las especies descritas en Enviga
 1. **Preparación.** Se comprueban los 120 IDs, los rangos de longitud y la procedencia de las citas. Se indexa un vector por ficha en Qdrant local. La colección se identifica con una huella del archivo y el modelo de embeddings.
 2. **Consulta.** Se extraen tamaño, colores, dieta, entorno y vuelo. Se comprueba la medida en el texto original y se convierte a centímetros. Para medidas puntuales se usa ±20 % como tolerancia inicial. Un rango explícito conserva sus extremos. Qdrant recibe solo los IDs con medidas que se solapan con el rango.
 3. **Recuperación y respuesta.** El coseno recupera hasta 14 fichas. Se revisan coincidencias y diferencias documentadas y se devuelven hasta tres. La similitud mide cercanía entre vectores. El servidor arma las respuestas a partir de campos reales y enlaza las citas correspondientes.
-4. **Modelos.** El modo NVIDIA usa [Nemotron 3.5 Embed 1B](https://build.nvidia.com/nvidia/nemotron-3_5-embed-1b) para los vectores y [Nemotron 3.5 Lightning](https://build.nvidia.com/nvidia/nemotron-3.5-lightning-30b-a3b) para extraer atributos y seleccionar IDs. El modo local usa [multilingual-e5-small](https://huggingface.co/intfloat/multilingual-e5-small) en CPU y aplica reglas para los atributos y la selección. Ambos usan modelos preentrenados, con Qdrant y Gradio en el equipo.
+4. **Modelos.** AvesCO usa [Nemotron 3.5 Embed 1B](https://build.nvidia.com/nvidia/nemotron-3_5-embed-1b) para los vectores y [Nemotron 3.5 Lightning](https://build.nvidia.com/nvidia/nemotron-3.5-lightning-30b-a3b) para extraer atributos y seleccionar IDs. La clave NVIDIA_API_KEY es obligatoria.
 5. **Evaluación.** Se usa como línea base el solapamiento léxico del ejercicio de documentos. Se cuenta si el ID esperado aparece entre los tres primeros en los casos positivos y si hay abstención en el caso externo. Se comprueba que las URLs y localizadores pertenezcan a las fichas citadas. Las consultas de calibración y evaluación quedan fuera del índice.
 
 **Flujo metodológico**
@@ -64,15 +64,13 @@ sequenceDiagram
     actor U as Persona usuaria
     participant W as Gradio en localhost
     participant A as Asistente AvesCO
-    participant M as NVIDIA NIM o E5 local
+    participant M as NVIDIA NIM
     participant Q as Qdrant local
     participant C as Catálogo y evidencias
     U->>W: Envía una descripción
     W->>A: Identifica el ave
-    opt Modo NVIDIA
-        A->>M: Solicita atributos en JSON
-        M-->>A: Devuelve los atributos
-    end
+    A->>M: Solicita atributos en JSON
+    M-->>A: Devuelve los atributos
     A->>C: Lee medidas y calcula IDs elegibles
     alt Hay suficientes rasgos y candidatas
         A->>M: Solicita el embedding de consulta
@@ -80,7 +78,7 @@ sequenceDiagram
         A->>Q: Busca por coseno entre los IDs elegibles
         Q-->>A: Devuelve candidatas y puntajes
         A->>C: Verifica rasgos y obtiene citas
-        opt Modo NVIDIA con candidatas respaldadas
+        opt Hay candidatas respaldadas
             A->>M: Solicita selección de IDs recuperados
             M-->>A: Devuelve IDs seleccionados
         end
@@ -93,17 +91,9 @@ sequenceDiagram
 
 ## 6. Resultados
 
-El umbral general de similitud coseno es **0,80** con E5 local y **0,26** con NVIDIA. Se ajustó cada umbral con cuatro consultas separadas de los casos finales. En ambos modos, las dos especies esperadas aparecieron entre las candidatas y el asistente se abstuvo en los dos casos negativos. Con NVIDIA, una ficha puede quedar hasta **0,06** por debajo del umbral general si su tamaño está dentro del intervalo escrito, coincide en al menos tres colores y no hay diferencias en los rasgos comparables. Se puede ajustar el umbral general de NVIDIA con `UMBRAL_NVIDIA`.
+El umbral general de similitud coseno es **0,26**. Se ajustó el umbral con cuatro consultas separadas de los casos finales. Las dos especies esperadas aparecieron entre las candidatas y el asistente se abstuvo en los dos casos negativos. Con NVIDIA, una ficha puede quedar hasta **0,06** por debajo del umbral general si su tamaño está dentro del intervalo escrito, coincide en al menos tres colores y no hay diferencias en los rasgos comparables. Se puede ajustar el umbral general de NVIDIA con `UMBRAL_NVIDIA`.
 
-| Caso y consulta resumida | Esperado | Resultado local | Línea base |
-| --- | --- | --- | --- |
-| Habitual. Ave roja de 13 cm con alas negras e insectos en un jardín | Titiribí Pechirrojo | 1.ª, guía p. 210 | Fuera de las tres primeras |
-| Habitual. Pecho azul violáceo, alas verdosas y 33 cm en humedal | Polla Azul | 1.ª, guía p. 80 | 1.ª |
-| Habitual. Gris azulado, alas azules, 16 cm, fruta y parque | Azulejo Común | 1.ª, guía p. 331 | 1.ª |
-| Dato de la fuente. Vientre amarillo, ceja blanca y 21–23 cm | Bichofué Común | 2.ª, guía p. 195 | Fuera de las tres primeras |
-| Externo. Ave negra y blanca de 110–120 cm que camina sobre hielo | Abstención | Abstención. Cero fichas tras el filtro | Devolvió tres candidatas |
-
-La recuperación local acertó **4/4 en las tres primeras posiciones** y se abstuvo en **1/1** caso externo. La línea base acertó **2/4** y se abstuvo en **0/1**. Las cuatro respuestas con candidatas incluyeron citas recuperadas del catálogo. [Consultas completas](evaluacion/casos.json) · [Respuestas y puntajes registrados](evaluacion/resultados_local.json).
+[Consultas completas](evaluacion/casos.json).
 
 Con la API de NVIDIA, AvesCO acertó **4/4** identificaciones y se abstuvo en **1/1** caso externo. El caso del Bichofué Común sirvió para ajustar la regla de tamaño y colores, por lo que su resultado ilustra el ajuste y requiere validación con observaciones nuevas. [Respuestas y puntajes con NVIDIA](evaluacion/resultados_nvidia.json).
 
@@ -116,25 +106,24 @@ Desde la raíz del repositorio, con **Python 3.13** en Windows:
 ```powershell
 python -m venv .venv
 .venv/Scripts/python.exe -m pip install -r requirements.txt
-.venv/Scripts/python.exe app.py --modo local
 ```
 
-Abre [AvesCO en localhost](http://127.0.0.1:7860). El primer arranque local descarga el modelo E5 cuantizado y su tokenizador, unos 135 MB. Después reutiliza la caché y el índice. El servidor escucha únicamente en `127.0.0.1`.
-
-Para usar NVIDIA, copia `.env.example` a `.env`, completa `NVIDIA_API_KEY` en ese archivo y ejecuta:
+Crea `.env` a partir de `.env.example` y completa `NVIDIA_API_KEY`. Inicia la interfaz:
 
 ```powershell
-.venv/Scripts/python.exe app.py --modo nvidia
+.venv/Scripts/python.exe app.py --puerto 7861
 ```
 
-Para reconstruir el índice, evaluar o ejecutar las pruebas, detén la app que tenga abierto el índice del mismo modo y usa:
+Abre [AvesCO](http://127.0.0.1:7861). El primer arranque crea el índice con embeddings de NVIDIA. Después reutiliza el índice y llama a la API para procesar consultas nuevas.
+
+Para reconstruir el índice o evaluar, detén primero la app si está usando el índice:
 
 ```powershell
-.venv/Scripts/python.exe -m avesco.indice --modo local
-.venv/Scripts/python.exe evaluar.py --modo local --calibracion
-.venv/Scripts/python.exe evaluar.py --modo local --salida evaluacion/resultados_local.json
+.venv/Scripts/python.exe -m avesco.indice
+.venv/Scripts/python.exe evaluar.py --calibracion
+.venv/Scripts/python.exe evaluar.py --salida evaluacion/resultados_nvidia.json
 .venv/Scripts/python.exe -m pip install -r requirements-dev.txt
 .venv/Scripts/python.exe -m pytest -q
 ```
 
-`app.py` contiene la interfaz, `avesco/` el pipeline, `data/` los datos y sus fuentes, `evaluacion/` los casos y resultados, y `tests/` las pruebas. `.avesco/` almacena el índice y el modelo descargado. `.env` guarda la configuración privada.
+`app.py` contiene la interfaz, `avesco/` el pipeline, `data/` los datos y sus fuentes, `evaluacion/` los casos y resultados, y `tests/` las pruebas. `.avesco/` almacena el índice. `.env` guarda la configuración privada.

@@ -1,16 +1,9 @@
-"""Clientes preentrenados para embeddings y chat. El modo local usa CPU."""
+"""Cliente de NVIDIA NIM para embeddings y chat."""
 
 import json
-import tempfile
-from pathlib import Path
-from urllib.request import urlretrieve
-
-import numpy as np
 from openai import APIConnectionError, APIStatusError, OpenAI
 
-from avesco.configuracion import CACHE, NVIDIA_URL
-
-REVISION_E5 = "614241f622f53c4eeff9890bdc4f31cfecc418b3"
+from avesco.configuracion import NVIDIA_URL
 
 
 class ErrorModelo(RuntimeError):
@@ -63,57 +56,3 @@ class ClienteNvidia:
             return valor if isinstance(valor, dict) else None
         except (json.JSONDecodeError, IndexError):
             return None
-
-
-class EmbeddingsLocales:
-    """E5 multilingüe cuantizado con prefijos query/passage y promedio enmascarado."""
-
-    identificador = f"intfloat/multilingual-e5-small@{REVISION_E5}"
-
-    def __init__(self, carpeta=CACHE / "modelo_e5"):
-        self.carpeta = carpeta
-        self.sesion = None
-        self.tokenizador = None
-
-    def _descargar(self, nombre, remoto):
-        destino = self.carpeta / nombre
-        if destino.is_file():
-            return destino
-        self.carpeta.mkdir(parents=True, exist_ok=True)
-        url = f"https://huggingface.co/intfloat/multilingual-e5-small/resolve/{REVISION_E5}/{remoto}"
-        print(f"Descargando {nombre} para el modo local (solo la primera vez)...", flush=True)
-        with tempfile.TemporaryDirectory(dir=self.carpeta) as carpeta:
-            temporal = Path(carpeta) / nombre
-            urlretrieve(url, temporal)
-            temporal.replace(destino)
-        return destino
-
-    def _cargar(self):
-        from onnxruntime import InferenceSession, SessionOptions
-        from tokenizers import Tokenizer
-
-        opciones = SessionOptions()
-        opciones.intra_op_num_threads = 4
-        modelo = self._descargar("model.onnx", "onnx/model_qint8_avx512_vnni.onnx")
-        vocab = self._descargar("tokenizer.json", "tokenizer.json")
-        tokenizador = Tokenizer.from_file(str(vocab))
-        tokenizador.enable_truncation(max_length=512)
-        tokenizador.enable_padding(pad_id=1, pad_token="<pad>")
-        self.sesion = InferenceSession(str(modelo), opciones, providers=["CPUExecutionProvider"])
-        self.tokenizador = tokenizador
-
-    def embeddings(self, textos, tipo):
-        if self.sesion is None:
-            self._cargar()
-        tokens = self.tokenizador.encode_batch([f"{tipo}: {texto}" for texto in textos])
-        mascara = np.asarray([t.attention_mask for t in tokens], dtype=np.int64)
-        entrada = {
-            "input_ids": np.asarray([t.ids for t in tokens], dtype=np.int64),
-            "attention_mask": mascara,
-            "token_type_ids": np.asarray([t.type_ids for t in tokens], dtype=np.int64),
-        }
-        entrada = {i.name: entrada[i.name] for i in self.sesion.get_inputs()}
-        vectores_token = self.sesion.run(["last_hidden_state"], entrada)[0]
-        vectores = (vectores_token * mascara[..., None]).sum(axis=1) / mascara.sum(axis=1, keepdims=True)
-        vectores /= np.linalg.norm(vectores, axis=1, keepdims=True)
-        return vectores.tolist()

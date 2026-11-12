@@ -5,7 +5,7 @@ import json
 from pathlib import Path
 
 from avesco.asistente import AsistenteAves, buscar_por_palabras
-from avesco.configuracion import RAIZ, Configuracion, opcion_modo
+from avesco.configuracion import RAIZ, Configuracion
 from avesco.datos import Catalogo
 from avesco.indice import crear_indice
 
@@ -39,16 +39,15 @@ def evaluar(casos, asistente, umbral=None):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    opcion_modo(parser)
     parser.add_argument("--calibracion", action="store_true", help="Ejecuta solo el conjunto de calibración.")
     parser.add_argument("--umbral", type=float)
     parser.add_argument("--salida", type=Path)
     args = parser.parse_args()
-    config = Configuracion.cargar(args.modo)
+    config = Configuracion.cargar()
     catalogo = Catalogo.cargar()
     indice = crear_indice(config, catalogo)
     try:
-        asistente = AsistenteAves(config, catalogo, indice, indice.modelo if config.modo == "nvidia" else None)
+        asistente = AsistenteAves(config, catalogo, indice, indice.modelo)
         conjunto = "calibracion" if args.calibracion else "finales"
         casos = json.loads((RAIZ / "evaluacion/casos.json").read_text(encoding="utf-8"))[conjunto]
         resultados = evaluar(casos, asistente, args.umbral)

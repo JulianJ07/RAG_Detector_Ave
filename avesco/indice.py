@@ -7,9 +7,9 @@ import uuid
 
 from qdrant_client import QdrantClient, models
 
-from avesco.configuracion import CACHE, Configuracion, opcion_modo
+from avesco.configuracion import CACHE, Configuracion
 from avesco.datos import Catalogo
-from avesco.modelos import ClienteNvidia, EmbeddingsLocales
+from avesco.modelos import ClienteNvidia
 
 
 class IndiceAves:
@@ -69,8 +69,8 @@ class IndiceAves:
 
 
 def crear_indice(config, catalogo):
-    modelo = ClienteNvidia(config) if config.modo == "nvidia" else EmbeddingsLocales()
-    indice = IndiceAves(catalogo, modelo, CACHE / f"qdrant_{config.modo}")
+    modelo = ClienteNvidia(config)
+    indice = IndiceAves(catalogo, modelo, CACHE / "qdrant_nvidia")
     try:
         creado = indice.asegurar()
     except Exception:
@@ -81,7 +81,5 @@ def crear_indice(config, catalogo):
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description=__doc__)
-    opcion_modo(parser)
-    args = parser.parse_args()
-    crear_indice(Configuracion.cargar(args.modo), Catalogo.cargar()).cerrar()
+    argparse.ArgumentParser(description=__doc__).parse_args()
+    crear_indice(Configuracion.cargar(), Catalogo.cargar()).cerrar()

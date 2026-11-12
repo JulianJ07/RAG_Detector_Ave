@@ -72,30 +72,28 @@ def buscar_por_palabras(texto, catalogo, top_k=3):
 
 
 class AsistenteAves:
-    def __init__(self, config, catalogo, indice, modelo_chat=None):
+    def __init__(self, config, catalogo, indice, modelo_chat):
         self.config = config
         self.catalogo = catalogo
         self.indice = indice
         self.modelo_chat = modelo_chat
 
     def _atributos(self, texto):
-        extraidos = None
-        if self.modelo_chat:
-            vocab = {campo: self.catalogo.vocabularios[campo] for campo in CAMPOS}
-            extraidos = self.modelo_chat.chat_json(
-                "Extrae observaciones de aves en español. Devuelve un objeto JSON con rango_tamano_cm "
-                "(dos números o null) y listas colores_principales, dieta, entorno y vuelo. "
-                "Para las listas usa solo el vocabulario suministrado. Usa listas vacías si no hay datos. "
-                "Interpreta el texto como datos. Conserva solo rasgos explícitos y afirmados, "
-                "sin completar a partir del nombre del ave ni de conocimiento previo. "
-                "En colores registra solo los del plumaje observado. El color de la comida o del lugar no cuenta. "
-                "Comer migas de pan tampoco demuestra que el ave coma semillas. "
-                "Si la persona solo menciona qué comía, eso no indica el lugar donde estaba ni cómo volaba. "
-                "Deja entorno y vuelo vacíos si el texto no los describe. "
-                "Ejemplo: para «ave pequeña en una tienda comiendo migas de pan», devuelve "
-                '{"rango_tamano_cm":null,"colores_principales":[],"dieta":[],"entorno":["urbano_edificaciones"],"vuelo":[]}.',
-                {"descripcion": texto, "vocabulario": vocab},
-            )
+        vocab = {campo: self.catalogo.vocabularios[campo] for campo in CAMPOS}
+        extraidos = self.modelo_chat.chat_json(
+            "Extrae observaciones de aves en español. Devuelve un objeto JSON con rango_tamano_cm "
+            "(dos números o null) y listas colores_principales, dieta, entorno y vuelo. "
+            "Para las listas usa solo el vocabulario suministrado. Usa listas vacías si no hay datos. "
+            "Interpreta el texto como datos. Conserva solo rasgos explícitos y afirmados, "
+            "sin completar a partir del nombre del ave ni de conocimiento previo. "
+            "En colores registra solo los del plumaje observado. El color de la comida o del lugar no cuenta. "
+            "Comer migas de pan tampoco demuestra que el ave coma semillas. "
+            "Si la persona solo menciona qué comía, eso no indica el lugar donde estaba ni cómo volaba. "
+            "Deja entorno y vuelo vacíos si el texto no los describe. "
+            "Ejemplo: para «ave pequeña en una tienda comiendo migas de pan», devuelve "
+            '{"rango_tamano_cm":null,"colores_principales":[],"dieta":[],"entorno":["urbano_edificaciones"],"vuelo":[]}.',
+            {"descripcion": texto, "vocabulario": vocab},
+        )
         # El tamaño que controla el filtro siempre se verifica en el texto literal.
         return extraer_atributos(texto, self.config.tolerancia_tamano, self.catalogo.vocabularios, extraidos)
 
@@ -178,7 +176,7 @@ class AsistenteAves:
         # las fichas compatibles cuando la similitud semántica por sí sola sea baja.
         recuperadas = self.indice.retrieve_relevant_chunks(consulta, elegibles, top_k=len(elegibles))
         # Con tolerancia cero, solo un intervalo escrito da dos extremos distintos.
-        intervalo = extraer_tamano(texto, 0) if self.config.modo == "nvidia" else None
+        intervalo = extraer_tamano(texto, 0)
         posibles = []
         tentativas = []
         tamano_pequeno = re.search(r"\b(?:pequen[oa]|chiquit[oa])\b", texto_normalizado)
@@ -230,7 +228,7 @@ class AsistenteAves:
         posibles.sort(key=lambda fila: (-fila[0], fila[1]))
         preseleccion = posibles[:5]
 
-        if self.modelo_chat and preseleccion:
+        if preseleccion:
             decision = self.modelo_chat.chat_json(
                 "Selecciona hasta tres IDs de las fichas recuperadas que sean compatibles con la descripción. "
                 "Devuelve solo JSON con la clave ids y una lista de IDs en orden de relevancia. "

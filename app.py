@@ -6,7 +6,7 @@ import os
 import gradio as gr
 
 from avesco.asistente import AsistenteAves, ETIQUETAS_CAMPOS, NO_SE, OPCIONES_TENTATIVAS
-from avesco.configuracion import Configuracion, opcion_modo
+from avesco.configuracion import Configuracion
 from avesco.datos import Catalogo
 from avesco.indice import crear_indice
 from avesco.modelos import ErrorModelo
@@ -76,9 +76,6 @@ def reunir_pistas(mensaje, historial):
 
 
 def construir_interfaz(asistente):
-    modo = ("NVIDIA NIM para consulta, embeddings y selección." if asistente.config.modo == "nvidia"
-            else "Modo local con embeddings multilingües y respuestas basadas en reglas.")
-
     def responder(mensaje, history):
         mensaje = (mensaje or "").strip()
         if not mensaje:
@@ -122,7 +119,7 @@ def construir_interfaz(asistente):
                 for etiqueta, ejemplo in EJEMPLOS:
                     boton = gr.Button(etiqueta, variant="secondary")
                     boton.click(lambda texto=ejemplo: texto, outputs=mensaje, api_visibility="private")
-                gr.Markdown(modo, elem_id="modo")
+                gr.Markdown("NVIDIA NIM para consulta, embeddings y selección.", elem_id="modo")
                 with gr.Accordion("Cómo se buscó", open=False):
                     diagnostico = gr.JSON(label="Atributos, filtro y similitud")
 
@@ -138,15 +135,13 @@ def construir_interfaz(asistente):
 def main():
     os.environ.setdefault("GRADIO_ANALYTICS_ENABLED", "False")
     parser = argparse.ArgumentParser(description=__doc__)
-    opcion_modo(parser)
-    parser.set_defaults(modo="nvidia")
     parser.add_argument("--puerto", type=int, default=7860)
     args = parser.parse_args()
-    config = Configuracion.cargar(args.modo)
+    config = Configuracion.cargar()
     catalogo = Catalogo.cargar()
     indice = crear_indice(config, catalogo)
     try:
-        asistente = AsistenteAves(config, catalogo, indice, indice.modelo if config.modo == "nvidia" else None)
+        asistente = AsistenteAves(config, catalogo, indice, indice.modelo)
         construir_interfaz(asistente).launch(
             server_name="127.0.0.1", server_port=args.puerto, share=False,
             css=CSS, show_error=True,

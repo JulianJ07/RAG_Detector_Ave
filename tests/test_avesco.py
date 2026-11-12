@@ -20,7 +20,7 @@ def catalogo():
 
 @pytest.fixture
 def config():
-    return Configuracion("local", "", "chat-prueba", "embed-prueba", 0.20, 0.80)
+    return Configuracion("", "chat-prueba", "embed-prueba", 0.20, 0.80)
 
 
 @pytest.mark.parametrize(("consulta", "esperado"), [
@@ -98,7 +98,7 @@ def test_indice_reutiliza_y_filtra(tmp_path, catalogo):
 
 
 def test_abstencion_sin_busqueda(config, catalogo):
-    asistente = AsistenteAves(config, catalogo, None)
+    asistente = AsistenteAves(config, catalogo, None, SimpleNamespace(chat_json=lambda *_: None))
     assert asistente.responder("Vi un ave.")["estado"] == "abstencion"
     assert asistente.responder("Ave roja de entre 110 y 120 cm.")["diagnostico"]["especies_despues_del_filtro"] == 0
     assert "vuelo" in asistente.responder("Se quedaba suspendida.")["nota"]
@@ -125,7 +125,7 @@ def test_cita_y_respuesta_del_llm_invalida(config, catalogo):
 
 
 def test_contrato_nvidia_con_transporte_simulado(config):
-    nvidia = ClienteNvidia(Configuracion("nvidia", "clave-prueba", config.modelo_chat, config.modelo_embed, 0.2, 0.6))
+    nvidia = ClienteNvidia(Configuracion("clave-prueba", config.modelo_chat, config.modelo_embed, 0.2, 0.6))
     llamadas = []
 
     def responder(request):
