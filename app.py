@@ -1,7 +1,10 @@
 """Interfaz local de AvesCO. Ejecutar con python app.py."""
 
 import argparse
+from base64 import b64encode
+from html import escape
 import os
+from pathlib import Path
 
 import gradio as gr
 
@@ -11,6 +14,8 @@ from avesco.consulta import extraer_atributos, extraer_taxonomia
 from avesco.datos import Catalogo
 from avesco.indice import crear_indice
 from avesco.modelos import ErrorModelo
+
+FOTOS_GUIA = Path(__file__).resolve().parent / "data" / "raw" / "fotos_envigado"
 
 EJEMPLOS = (
     ("Ave roja en un jardín", "Vi un ave de unos 13 cm, roja con alas negras. Atrapaba insectos en un jardín."),
@@ -34,7 +39,49 @@ CSS = """
 #accion-consulta { background: #215940; border-color: #215940; color: white; }
 #accion-consulta:hover { background: #174731; }
 #panel-lateral { min-width: min(100%, 250px); }
+.ficha-ave { display: grid; grid-template-columns: minmax(100px, 36%) 1fr;
+    gap: 14px; align-items: start; border: 1px solid var(--border-color-primary);
+    padding: 14px; border-radius: 14px; margin: 12px 0; }
+.ficha-ave figure { margin: 0; }
+.ficha-ave > div:only-child { grid-column: 1 / -1; }
+.ficha-ave img { display: block; width: 100%; height: auto; border-radius: 8px; }
+.ficha-ave figcaption, .ficha-ave .nombre-cientifico { font-size: .84rem; }
+.ficha-ave h3 { margin: 0 0 4px; }
+.ficha-ave p { margin: 6px 0; }
+@media (max-width: 500px) {
+    .ficha-ave { grid-template-columns: 1fr; }
+    .ficha-ave img { max-height: 320px; object-fit: contain; }
+}
 """
+
+
+def tarjetas_de_especies(aves, catalogo):
+    """Presenta el último resultado con las fotos locales vinculadas al catálogo."""
+    tarjetas = []
+    for ave in aves:
+        ficha = catalogo.aves[ave["id"]]
+        nombre = escape(ave["nombre_comun"])
+        ruta = FOTOS_GUIA / f'{ficha["id"]}.webp'
+        foto = ""
+        if ruta.is_file():
+            contenido = b64encode(ruta.read_bytes()).decode("ascii")
+            foto = (
+                f'<figure><img src="data:image/webp;base64,{contenido}" alt="Foto de {nombre}">'
+                '<figcaption>Guía de las aves de Envigado</figcaption></figure>'
+            )
+        enlace = escape(ficha["fuente_pagina_o_url"], quote=True)
+        tarjetas.append(
+            '<article class="ficha-ave">'
+            f'{foto}<div><h3>{nombre}</h3>'
+            f'<p class="nombre-cientifico"><i>{escape(ave["nombre_cientifico"])}</i></p>'
+            f'<p><strong>Tamaño</strong> · {escape(ave["tamano"])}</p>'
+            f'<p>{escape(ave["plumaje"])}</p>'
+            f'<a href="{enlace}" target="_blank" rel="noopener noreferrer">Ver ficha en la guía</a>'
+            '</div></article>'
+        )
+    if not tarjetas:
+        return ""
+    return '<section aria-label="Especies sugeridas"><h2>Especies sugeridas</h2>' + "".join(tarjetas) + "</section>"
 
 
 def formatear_respuesta(resultado):
@@ -97,7 +144,7 @@ def construir_interfaz(asistente):
     def responder(mensaje, history):
         mensaje = (mensaje or "").strip()
         if not mensaje:
-            return "", history or [], {}
+            return "", history or [], {}, gr.skip()
         if len(mensaje) > 1600:
             raise gr.Error("La descripción admite hasta 1600 caracteres.")
         es_ejemplo = any(mensaje == ejemplo for _, ejemplo in EJEMPLOS)
@@ -108,14 +155,16 @@ def construir_interfaz(asistente):
             resultado = asistente.responder(descripcion)
             respuesta = formatear_respuesta(resultado)
             diagnostico = resultado["diagnostico"]
+            tarjetas = tarjetas_de_especies(resultado["aves"], asistente.catalogo)
         except ErrorModelo as error:
             respuesta = str(error)
             diagnostico = {"estado": "error_api"}
+            tarjetas = ""
         return "", [
             *(history or []),
             {"role": "user", "content": mensaje},
             {"role": "assistant", "content": respuesta},
-        ], diagnostico
+        ], diagnostico, tarjetas
 
     with gr.Blocks(title="AvesCO · Valle de Aburrá", analytics_enabled=False) as demo:
         gr.HTML(
@@ -132,21 +181,22 @@ def construir_interfaz(asistente):
                 with gr.Row():
                     enviar = gr.Button("Buscar coincidencias", variant="primary", elem_id="accion-consulta")
                     limpiar = gr.Button("Limpiar conversación", variant="secondary")
-            with gr.Column(scale=1, elem_id="panel-lateral"):
-                gr.Markdown("### Prueba una descripción")
-                for etiqueta, ejemplo in EJEMPLOS:
-                    boton = gr.Button(etiqueta, variant="secondary")
-                    boton.click(lambda texto=ejemplo: texto, outputs=mensaje, api_visibility="private")
+            with gr.Column(scale=2, elem_id="panel-lateral"):
+                fichas = gr.HTML()
+                with gr.Accordion("Prueba una descripción", open=True):
+                    for etiqueta, ejemplo in EJEMPLOS:
+                        boton = gr.Button(etiqueta, variant="secondary")
+                        boton.click(lambda texto=ejemplo: texto, outputs=mensaje, api_visibility="private")
                 gr.Markdown("NVIDIA NIM para consulta, embeddings y selección.", elem_id="modo")
                 with gr.Accordion("Cómo se buscó", open=False):
                     diagnostico = gr.JSON(label="Atributos, filtro y similitud")
 
         gr.on(
             triggers=[mensaje.submit, enviar.click], fn=responder, inputs=[mensaje, history],
-            outputs=[mensaje, history, diagnostico], api_name="identificar",
+            outputs=[mensaje, history, diagnostico, fichas], api_name="identificar",
             concurrency_limit=1,
         )
-        limpiar.click(lambda: ("", [], {}), outputs=[mensaje, history, diagnostico], api_visibility="private")
+        limpiar.click(lambda: ("", [], {}, ""), outputs=[mensaje, history, diagnostico, fichas], api_visibility="private")
     return demo
 
 
