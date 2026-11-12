@@ -111,6 +111,20 @@ def test_tentativas_con_similitud_baja(config, catalogo):
     assert asistente.responder("Ave negra y blanca sobre el hielo de un lago.")["estado"] == "abstencion"
 
 
+def test_migas_de_pan_favorecen_aves_urbanas(catalogo):
+    config = Configuracion("", "chat-prueba", "embed-prueba", 0.20, 0.26)
+    puntajes = {"sporophila_intermedia": 0.3816, "vanellus_chilensis": 0.3373,
+                "columba_livia": 0.3020, "patagioenas_fasciata": 0.2740}
+
+    def buscar(_texto, ids, top_k):
+        return sorted(((i, s) for i, s in puntajes.items() if i in ids), key=lambda p: -p[1])
+
+    asistente = AsistenteAves(config, catalogo, SimpleNamespace(retrieve_relevant_chunks=buscar),
+                              SimpleNamespace(chat_json=lambda *_: None))
+    respuesta = asistente.responder("vi un ave comiendo migas de pan al medio dia\nblanca con gris")
+    assert respuesta["aves"][0]["id"] == "columba_livia"
+
+
 def test_complemento_tras_identificacion():
     historial = [
         {"role": "user", "content": "Era rojo con alas negras, de unos 13 cm."},
