@@ -67,6 +67,26 @@ def comparar(ave, atributos):
     return coincidencias, diferencias
 
 
+def pedir_descripcion_completa(atributos, texto_normalizado=""):
+    """Cada mensaje se analiza por separado. Pide repetir la descripción con los datos que faltan."""
+    menciona_comida = re.search(r"\b(?:comia|comiendo|come|comio|comer|alimentaba)\b", texto_normalizado)
+    faltan = []
+    if not atributos.rango_tamano_cm:
+        faltan.append("el tamaño aproximado en centímetros")
+    if not atributos.colores_principales:
+        faltan.append("los colores del plumaje (incluidas manchas o rayas)")
+    if not atributos.entorno:
+        faltan.append("el lugar donde la viste")
+    if not atributos.dieta and not menciona_comida:
+        faltan.append("qué estaba comiendo")
+    if not faltan:
+        faltan.append("algún detalle del pico, las alas o la cola")
+    return (
+        "Vuelve a escribir la descripción completa en un solo mensaje, con lo que ya contaste, "
+        f"y agrega {lista_texto(faltan)}."
+    )
+
+
 def acepta_comida_humana(ave):
     """Aves documentadas en zonas urbanas, con dieta de semillas u omnívora.
     Un parque solo no basta: la Caravana frecuenta parques pero no recoge migas en la calle."""
@@ -176,7 +196,10 @@ class AsistenteAves:
         candidatas_filtradas = filtrar_por_tamano(self.catalogo.aves, atributos.rango_tamano_cm)
         diagnostico["especies_despues_del_filtro"] = len(candidatas_filtradas)
         if not candidatas_filtradas:
-            resultado["mensaje"] += " Ninguna ficha coincide con esa medida. ¿Puedes revisar el tamaño aproximado?"
+            resultado["mensaje"] += (
+                " Ninguna ficha coincide con esa medida. Revisa el tamaño y vuelve a enviar la descripción completa "
+                "en un solo mensaje, con la medida corregida."
+            )
             return resultado
 
         texto_normalizado = normalizar(texto)
@@ -187,10 +210,7 @@ class AsistenteAves:
         cantidad_rasgos = sum(bool(x) for x in (
             atributos.rango_tamano_cm, atributos.colores_principales, atributos.dieta, atributos.entorno,
         ))
-        if not atributos.colores_principales:
-            pista = "¿De qué color era el ave? ¿Viste alguna mancha o raya en las alas?"
-        else:
-            pista = "¿Recuerdas algún detalle del pico o de las alas?"
+        pista = pedir_descripcion_completa(atributos, texto_normalizado)
         if not cantidad_rasgos and not nombres:
             resultado["mensaje"] += " " + pista
             return resultado

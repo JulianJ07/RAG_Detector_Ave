@@ -5,9 +5,8 @@ import os
 
 import gradio as gr
 
-from avesco.asistente import AsistenteAves, ETIQUETAS_CAMPOS, NO_SE, OPCIONES_TENTATIVAS
+from avesco.asistente import AsistenteAves, ETIQUETAS_CAMPOS
 from avesco.configuracion import Configuracion
-from avesco.consulta import extraer_atributos
 from avesco.datos import Catalogo
 from avesco.indice import crear_indice
 from avesco.modelos import ErrorModelo
@@ -56,50 +55,16 @@ def formatear_respuesta(resultado):
     return "\n\n".join(partes)
 
 
-def texto_del_mensaje(mensaje):
-    """Gradio puede entregar el contenido como texto o como bloques."""
-    contenido = mensaje["content"]
-    if isinstance(contenido, str):
-        return contenido
-    return " ".join(bloque["text"] for bloque in contenido if bloque["type"] == "text")
-
-
-def es_complemento(mensaje):
-    """Un mensaje sin tamaño ni colores suele añadir detalles al ave anterior, no describir otra."""
-    atributos = extraer_atributos(mensaje, 0, {})
-    return atributos.rango_tamano_cm is None and not atributos.colores_principales
-
-
-def reunir_pistas(mensaje, historial):
-    """Reúne las pistas de la observación hasta que haya una identificación.
-    Después de una identificación, un complemento como «comía insectos» se suma a la descripción anterior."""
-    pistas = [mensaje]
-    complemento = es_complemento(mensaje)
-    for anterior, respuesta in zip(historial[-2::-2], historial[-1::-2]):
-        if anterior["role"] != "user" or respuesta["role"] != "assistant":
-            break
-        sin_identificar = texto_del_mensaje(respuesta).startswith((NO_SE, OPCIONES_TENTATIVAS))
-        if not sin_identificar and not complemento:
-            break
-        pistas.append(texto_del_mensaje(anterior))
-        # Solo se encadena un complemento con la observación inmediatamente anterior.
-        complemento = False
-    return "\n".join(reversed(pistas))
-
-
 def construir_interfaz(asistente):
     def responder(mensaje, history):
+        # Cada mensaje se analiza por separado. Si faltan datos, el asistente pide la descripción completa.
         mensaje = (mensaje or "").strip()
         if not mensaje:
             return "", history or [], {}
         if len(mensaje) > 1600:
             raise gr.Error("La descripción admite hasta 1600 caracteres.")
-        es_ejemplo = any(mensaje == ejemplo for _, ejemplo in EJEMPLOS)
-        descripcion = mensaje if es_ejemplo else reunir_pistas(mensaje, history or [])
-        if len(descripcion) > 1600:
-            raise gr.Error("Las pistas juntas superan los 1600 caracteres. Limpia la conversación y resume tu observación.")
         try:
-            resultado = asistente.responder(descripcion)
+            resultado = asistente.responder(mensaje)
             respuesta = formatear_respuesta(resultado)
             diagnostico = resultado["diagnostico"]
         except ErrorModelo as error:

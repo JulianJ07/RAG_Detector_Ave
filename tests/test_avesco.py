@@ -5,7 +5,6 @@ import httpx
 import pytest
 from openai import OpenAI
 
-from app import reunir_pistas
 from avesco.asistente import AsistenteAves, comparar, menciona_nombre
 from avesco.configuracion import Configuracion, NVIDIA_URL
 from avesco.consulta import extraer_atributos, extraer_tamano, filtrar_por_tamano
@@ -125,13 +124,12 @@ def test_migas_de_pan_favorecen_aves_urbanas(catalogo):
     assert respuesta["aves"][0]["id"] == "columba_livia"
 
 
-def test_complemento_tras_identificacion():
-    historial = [
-        {"role": "user", "content": "Era rojo con alas negras, de unos 13 cm."},
-        {"role": "assistant", "content": "Estas son las coincidencias mejor respaldadas por las fichas."},
-    ]
-    assert reunir_pistas("Atrapaba insectos en un jardín.", historial).startswith("Era rojo")
-    assert reunir_pistas("Otra ave, azul de 16 cm.", historial) == "Otra ave, azul de 16 cm."
+def test_pide_descripcion_completa_con_lo_que_falta(config, catalogo):
+    asistente = AsistenteAves(config, catalogo, None, SimpleNamespace(chat_json=lambda *_: None))
+    mensaje = asistente.responder("Vi un ave comiendo migas de pan al mediodía.")["mensaje"]
+    assert "Vuelve a escribir la descripción completa" in mensaje
+    assert "tamaño" in mensaje and "colores" in mensaje and "lugar" in mensaje
+    assert "comiendo" not in mensaje
 
 
 class ModeloPrueba:
