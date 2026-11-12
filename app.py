@@ -5,8 +5,9 @@ import os
 
 import gradio as gr
 
-from avesco.asistente import AsistenteAves, ETIQUETAS_CAMPOS
+from avesco.asistente import AsistenteAves, ETIQUETAS_CAMPOS, NO_SE, OPCIONES_TENTATIVAS
 from avesco.configuracion import Configuracion
+from avesco.consulta import extraer_atributos, extraer_taxonomia
 from avesco.datos import Catalogo
 from avesco.indice import crear_indice
 from avesco.modelos import ErrorModelo
@@ -55,16 +56,56 @@ def formatear_respuesta(resultado):
     return "\n\n".join(partes)
 
 
+def texto_del_mensaje(mensaje):
+    """Gradio puede entregar el contenido como texto o como bloques."""
+    contenido = mensaje["content"]
+    if isinstance(contenido, str):
+        return contenido
+    return " ".join(bloque["text"] for bloque in contenido if bloque["type"] == "text")
+
+
+def reunir_pistas(mensaje, historial):
+    """Reúne las pistas de la observación hasta que haya una identificación."""
+    actuales = extraer_atributos(mensaje, 0, {})
+    # Una descripción extensa con medida y colores propios inicia otra observación.
+    # Las respuestas breves a preguntas aclaratorias siguen acumulando pistas.
+    if len(mensaje) >= 240 and actuales.rango_tamano_cm and len(actuales.colores_principales) >= 2:
+        return mensaje
+    familia_observacion = set(extraer_taxonomia(mensaje).get("familia", []))
+    limite_familia = 1 if familia_observacion else None
+    pistas = [mensaje]
+    for anterior, respuesta in zip(historial[-2::-2], historial[-1::-2]):
+        if anterior["role"] != "user" or respuesta["role"] != "assistant":
+            break
+        if not texto_del_mensaje(respuesta).startswith((NO_SE, OPCIONES_TENTATIVAS)):
+            break
+        texto_anterior = texto_del_mensaje(anterior)
+        familias_anteriores = set(extraer_taxonomia(texto_anterior).get("familia", []))
+        if familia_observacion and familias_anteriores and familia_observacion.isdisjoint(familias_anteriores):
+            # Si el mensaje cambia de familia, también descarta las pistas breves
+            # intermedias que pertenecían a la observación anterior.
+            pistas = pistas[:limite_familia]
+            break
+        familia_observacion.update(familias_anteriores)
+        pistas.append(texto_anterior)
+        if familias_anteriores:
+            limite_familia = len(pistas)
+    return "\n".join(reversed(pistas))
+
+
 def construir_interfaz(asistente):
     def responder(mensaje, history):
-        # Cada mensaje se analiza por separado. Si faltan datos, el asistente pide la descripción completa.
         mensaje = (mensaje or "").strip()
         if not mensaje:
             return "", history or [], {}
         if len(mensaje) > 1600:
             raise gr.Error("La descripción admite hasta 1600 caracteres.")
+        es_ejemplo = any(mensaje == ejemplo for _, ejemplo in EJEMPLOS)
+        descripcion = mensaje if es_ejemplo else reunir_pistas(mensaje, history or [])
+        if len(descripcion) > 1600:
+            raise gr.Error("Las pistas juntas superan los 1600 caracteres. Limpia la conversación y resume tu observación.")
         try:
-            resultado = asistente.responder(mensaje)
+            resultado = asistente.responder(descripcion)
             respuesta = formatear_respuesta(resultado)
             diagnostico = resultado["diagnostico"]
         except ErrorModelo as error:

@@ -47,13 +47,14 @@ class ClienteNvidia:
             {"role": "user", "content": json.dumps(entrada, ensure_ascii=False)},
         ]
         respuesta = self._llamar(
-            # El asistente puede seguir sin chat, así que no conviene esperar los 45 s de los embeddings.
-            self.client.with_options(timeout=20).chat.completions.create, model=self.modelo_chat, messages=messages,
+            self.client.chat.completions.create, model=self.modelo_chat, messages=messages,
             max_tokens=384, temperature=0, response_format={"type": "json_object"},
             extra_body={"chat_template_kwargs": {"enable_thinking": False}},
         )
         try:
             valor = json.loads(respuesta.choices[0].message.content or "")
-            return valor if isinstance(valor, dict) else None
-        except (json.JSONDecodeError, IndexError):
-            return None
+        except (json.JSONDecodeError, IndexError) as error:
+            raise ErrorModelo("NVIDIA devolvió una respuesta que no se pudo leer. Inténtalo otra vez.") from error
+        if not isinstance(valor, dict):
+            raise ErrorModelo("NVIDIA devolvió una respuesta inesperada. Inténtalo otra vez.")
+        return valor

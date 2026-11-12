@@ -1,0 +1,510 @@
+{
+  "version": 1,
+  "nota": "Casos sintéticos con etiquetas provisionales derivadas del catálogo; revisar antes de afirmar precisión real. No usar la reserva para ajustar reglas.",
+  "casos": [
+    {
+      "tipo": "habitual",
+      "consulta": "Vi un ave de unos 13 cm, roja con alas negras. Atrapaba insectos en un jardín.",
+      "esperado": "pyrocephalus_rubinus",
+      "id": "reg_original_1",
+      "grupo": "regresion",
+      "origen": "evaluacion_preexistente"
+    },
+    {
+      "tipo": "habitual",
+      "consulta": "En un humedal vi un ave de unos 33 cm con pecho azul violáceo y alas verdosas.",
+      "esperado": "porphyrio_martinica",
+      "id": "reg_original_2",
+      "grupo": "regresion",
+      "origen": "evaluacion_preexistente"
+    },
+    {
+      "tipo": "habitual",
+      "consulta": "En un parque vi un ave gris azulada con alas de azul más intenso. Era de unos 16 cm y comía frutas.",
+      "esperado": "thraupis_episcopus",
+      "id": "reg_original_3",
+      "grupo": "regresion",
+      "origen": "evaluacion_preexistente"
+    },
+    {
+      "tipo": "dato de la fuente",
+      "consulta": "Era de vientre amarillo y cabeza negra con ceja blanca. Medía entre 21 y 23 cm. ¿Qué coincidencia encaja con esa medida?",
+      "esperado": "pitangus_sulphuratus",
+      "id": "reg_original_4",
+      "grupo": "regresion",
+      "origen": "evaluacion_preexistente"
+    },
+    {
+      "tipo": "fuera del catálogo",
+      "consulta": "Vi un ave negra y blanca de entre 110 y 120 cm que caminaba erguida sobre el hielo. ¿Qué ave era?",
+      "esperado": null,
+      "referencia": "Caso de prueba inspirado en Aptenodytes forsteri, incluido en especies_fuera_del_dataset.csv.",
+      "id": "reg_original_5",
+      "grupo": "regresion",
+      "origen": "evaluacion_preexistente"
+    },
+    {
+      "id": "reg_gallinazo",
+      "grupo": "regresion",
+      "origen": "fallo_reportado_por_usuario",
+      "consulta": "es un ave rapaz carroñera de gran tamaño muy común en Colombia y en el continente americano.\n\nCaracterísticas principales\n\n• Tamaño y peso: Mide cerca de 74 cm de longitud, con una envergadura de alas de 1.33 m a 1.67 m y un peso que ronda los 2 a 2.75 kg.\n• Plumaje: Es de color negro intenso o lustroso en la mayor parte del cuerpo. Al volar, se aprecian unas manchas blancas características en la parte inferior de las puntas de las alas.\n• Cabeza y cuello: No tienen plumas; su piel es de color gris oscuro o negro mate, de aspecto arrugado. Esta adaptación evita que se ensucie con la descomposición al alimentarse.\n",
+      "esperado": "coragyps_atratus",
+      "atributos_esperados": {
+        "rango_tamano_cm": [
+          59.2,
+          88.8
+        ]
+      }
+    },
+    {
+      "id": "reg_siriri",
+      "grupo": "regresion",
+      "origen": "fallo_reportado_por_usuario",
+      "consulta": "es una pequeña ave paseriforme de la familia de los tiránidos.\n\nCaracterísticas principales\n\n• Tamaño y peso: Mide entre 18 y 22 centímetros de largo y pesa aproximadamente 39 a 40 gramos.\n• Apariencia física:\n        • Cabeza: Gris pálido con una máscara oscura en los ojos y, a veces, un discreto parche naranja o amarillento oculto en la coronilla.\n        • Dorso y alas: Espalda de tono gris oliváceo, con alas y cola de color café oscuro o negruzco.\n        • Vientre: Amarillo brillante muy característico en su parte inferior.\n        • Pico: Fuerte, recto y negruzco, adaptado para atrapar insectos.\n",
+      "esperado": "tyrannus_melancholicus",
+      "atributos_esperados": {
+        "rango_tamano_cm": [
+          18,
+          22
+        ]
+      }
+    },
+    {
+      "id": "reg_siriri_historial",
+      "grupo": "regresion",
+      "origen": "reproduccion_sintetica_del_fallo",
+      "consulta": "es una pequeña ave paseriforme de la familia de los tiránidos.\n\nCaracterísticas principales\n\n• Tamaño y peso: Mide entre 18 y 22 centímetros de largo y pesa aproximadamente 39 a 40 gramos.\n• Apariencia física:\n        • Cabeza: Gris pálido con una máscara oscura en los ojos y, a veces, un discreto parche naranja o amarillento oculto en la coronilla.\n        • Dorso y alas: Espalda de tono gris oliváceo, con alas y cola de color café oscuro o negruzco.\n        • Vientre: Amarillo brillante muy característico en su parte inferior.\n        • Pico: Fuerte, recto y negruzco, adaptado para atrapar insectos.\n",
+      "esperado": "tyrannus_melancholicus",
+      "atributos_esperados": {
+        "rango_tamano_cm": [
+          18,
+          22
+        ]
+      },
+      "historial": [
+        {
+          "role": "user",
+          "content": "Ave marrón de unos 12 cm en un parque."
+        },
+        {
+          "role": "assistant",
+          "content": "Estas son posibles opciones, con confianza baja."
+        }
+      ]
+    },
+    {
+      "id": "siriri_breve",
+      "grupo": "desarrollo",
+      "origen": "sintetico_catalogo",
+      "revision_humana": "pendiente",
+      "consulta": "Ave de 20 a 22 cm, cabeza gris clara, vientre amarillo y alas pardas. Atrapaba insectos.",
+      "esperado": "tyrannus_melancholicus",
+      "atributos_esperados": {
+        "rango_tamano_cm": [
+          20,
+          22
+        ],
+        "colores_principales": [
+          "gris",
+          "amarillo"
+        ],
+        "dieta": [
+          "insectos"
+        ],
+        "vuelo": []
+      }
+    },
+    {
+      "id": "siriri_metros",
+      "grupo": "desarrollo",
+      "origen": "sintetico_catalogo",
+      "revision_humana": "pendiente",
+      "consulta": "Paseriforme de la familia Tyrannidae. Medía 0,22 m, cabeza gris y vientre amarillo. Comía insectos.",
+      "esperado": "tyrannus_melancholicus",
+      "atributos_esperados": {
+        "rango_tamano_cm": [
+          17.6,
+          26.4
+        ],
+        "colores_principales": [
+          "gris",
+          "amarillo"
+        ],
+        "dieta": [
+          "insectos"
+        ]
+      }
+    },
+    {
+      "id": "siriri_no_colibri",
+      "grupo": "desarrollo",
+      "origen": "sintetico_catalogo",
+      "revision_humana": "pendiente",
+      "consulta": "No es un colibrí. Medía entre 20 y 22 cm. Cabeza gris y vientre amarillo, alas pardas. Comía insectos.",
+      "esperado": "tyrannus_melancholicus",
+      "atributos_esperados": {
+        "rango_tamano_cm": [
+          20,
+          22
+        ],
+        "colores_principales": [
+          "gris",
+          "amarillo"
+        ],
+        "dieta": [
+          "insectos"
+        ],
+        "vuelo": []
+      }
+    },
+    {
+      "id": "siriri_color_negado",
+      "grupo": "desarrollo",
+      "origen": "sintetico_catalogo",
+      "revision_humana": "pendiente",
+      "consulta": "Ave de la familia de los tiránidos, de 18 a 22 cm. Cabeza gris, vientre amarillo y alas pardas. No tenía plumas rojas. Comía insectos.",
+      "esperado": "tyrannus_melancholicus",
+      "atributos_esperados": {
+        "rango_tamano_cm": [
+          18,
+          22
+        ],
+        "colores_principales": [
+          "gris",
+          "amarillo"
+        ]
+      },
+      "atributos_prohibidos": {
+        "colores_principales": [
+          "rojo"
+        ]
+      }
+    },
+    {
+      "id": "gallinazo_orden_medidas",
+      "grupo": "desarrollo",
+      "origen": "sintetico_catalogo",
+      "revision_humana": "pendiente",
+      "consulta": "Ave carroñera de plumaje negro, cabeza desnuda oscura y manchas blancas en las puntas de las alas. Envergadura de alas de 1.33 m a 1.67 m, y longitud corporal de 74 cm.",
+      "esperado": "coragyps_atratus",
+      "atributos_esperados": {
+        "rango_tamano_cm": [
+          59.2,
+          88.8
+        ],
+        "dieta": [
+          "carroña"
+        ],
+        "colores_principales": [
+          "negro"
+        ]
+      }
+    },
+    {
+      "id": "paloma_sin_vuelo",
+      "grupo": "desarrollo",
+      "origen": "sintetico_catalogo",
+      "revision_humana": "pendiente",
+      "consulta": "Ave de 36 cm en la ciudad. Cuerpo gris, manchas blancas en las alas y reflejos violetas en el cuello.",
+      "esperado": "columba_livia",
+      "atributos_esperados": {
+        "rango_tamano_cm": [
+          28.8,
+          43.2
+        ],
+        "colores_principales": [
+          "gris",
+          "blanco",
+          "violeta"
+        ],
+        "vuelo": [],
+        "dieta": []
+      }
+    },
+    {
+      "id": "pinche_descripcion",
+      "grupo": "desarrollo",
+      "origen": "sintetico_catalogo",
+      "revision_humana": "pendiente",
+      "consulta": "Ave de 12,5 cm en la ciudad. Cabeza gris con franjas oscuras, garganta blanca, collar canela y dorso pardo. Comía semillas.",
+      "esperado": "zonotrichia_capensis",
+      "atributos_esperados": {
+        "rango_tamano_cm": [
+          10,
+          15
+        ],
+        "colores_principales": [
+          "gris",
+          "blanco",
+          "marrón"
+        ],
+        "dieta": [
+          "semillas"
+        ]
+      }
+    },
+    {
+      "id": "canario_descripcion",
+      "grupo": "desarrollo",
+      "origen": "sintetico_catalogo",
+      "revision_humana": "pendiente",
+      "consulta": "Ave de 14,5 cm en un jardín, cabeza y cuerpo amarillos, frente anaranjada y cola oscura. Comía semillas.",
+      "esperado": "sicalis_flaveola",
+      "atributos_esperados": {
+        "rango_tamano_cm": [
+          11.6,
+          17.4
+        ],
+        "colores_principales": [
+          "amarillo",
+          "naranja"
+        ],
+        "dieta": [
+          "semillas"
+        ]
+      }
+    },
+    {
+      "id": "vago_sin_rasgos",
+      "grupo": "desarrollo",
+      "origen": "sintetico_catalogo",
+      "revision_humana": "pendiente",
+      "consulta": "Vi un ave. ¿Cuál era?",
+      "esperado": null,
+      "atributos_esperados": {
+        "rango_tamano_cm": null,
+        "colores_principales": [],
+        "dieta": [],
+        "entorno": [],
+        "vuelo": []
+      }
+    },
+    {
+      "id": "color_de_comida",
+      "grupo": "desarrollo",
+      "origen": "sintetico_catalogo",
+      "revision_humana": "pendiente",
+      "consulta": "Vi un ave de 13 cm comiendo fruta roja en un jardín. No pude ver el color de sus plumas.",
+      "esperado": null,
+      "atributos_esperados": {
+        "rango_tamano_cm": [
+          10.4,
+          15.6
+        ],
+        "colores_principales": [],
+        "dieta": [
+          "frutas"
+        ],
+        "vuelo": []
+      },
+      "estados_permitidos": [
+        "abstencion",
+        "tentativas"
+      ]
+    },
+    {
+      "id": "medida_imposible_catalogo",
+      "grupo": "desarrollo",
+      "origen": "sintetico_catalogo",
+      "revision_humana": "pendiente",
+      "consulta": "Ave negra de entre 250 y 260 cm de longitud corporal en un parque.",
+      "esperado": null,
+      "atributos_esperados": {
+        "rango_tamano_cm": [
+          250,
+          260
+        ],
+        "colores_principales": [
+          "negro"
+        ]
+      }
+    },
+    {
+      "id": "solo_un_color",
+      "grupo": "desarrollo",
+      "origen": "sintetico_catalogo",
+      "revision_humana": "pendiente",
+      "consulta": "Vi un ave marrón, no pude observar nada más.",
+      "esperado": null,
+      "atributos_esperados": {
+        "rango_tamano_cm": null,
+        "colores_principales": [
+          "marrón"
+        ],
+        "dieta": [],
+        "entorno": [],
+        "vuelo": []
+      },
+      "estados_permitidos": [
+        "abstencion",
+        "tentativas"
+      ]
+    },
+    {
+      "id": "reserva_coereba_flaveola",
+      "grupo": "reserva",
+      "origen": "sintetico_catalogo",
+      "revision_humana": "pendiente",
+      "consulta": "Ave de 11 cm. Cabeza oscura con ceja blanca marcada y garganta gris clara. Vientre amarillo.",
+      "esperado": "coereba_flaveola"
+    },
+    {
+      "id": "reserva_falco_sparverius",
+      "grupo": "reserva",
+      "origen": "sintetico_catalogo",
+      "revision_humana": "pendiente",
+      "consulta": "Ave de 30 cm. Cara clara con dos marcas negras. El macho fotografiado luce dorso castaño moteado y pecho ocre.",
+      "esperado": "falco_sparverius"
+    },
+    {
+      "id": "reserva_pygochelidon_cyanoleuca",
+      "grupo": "reserva",
+      "origen": "sintetico_catalogo",
+      "revision_humana": "pendiente",
+      "consulta": "Ave de 12.5 cm. Dorso azul oscuro con alas negruzcas y garganta y vientre blancos.",
+      "esperado": "pygochelidon_cyanoleuca"
+    },
+    {
+      "id": "reserva_momotus_aequatorialis",
+      "grupo": "reserva",
+      "origen": "sintetico_catalogo",
+      "revision_humana": "pendiente",
+      "consulta": "Ave de 48 cm. Verde con máscara negra bordeada de azul y cola larga terminada en raquetas.",
+      "esperado": "momotus_aequatorialis"
+    },
+    {
+      "id": "reg_torcaza_comparacion",
+      "grupo": "regresion",
+      "origen": "fallo_reportado_por_usuario",
+      "consulta": "s una de las aves de la familia Columbidae más comunes y adaptables de Sudamérica.\n\nCaracterísticas principales\n\n• Tamaño: Mide entre 22 y 28 cm de largo, siendo bastante más pequeña que la paloma de ciudad (Columba livia).\n• Plumaje: Su coloración general es gris rosado o grisáceo perlado, con el vientre más claro y reflejos tornasolados o dorados en los laterales del cuello en los adultos.\n",
+      "esperado": "zenaida_auriculata",
+      "etiqueta": "Paloma torcaza, confirmada por el usuario; Zenaida auriculata en el catálogo",
+      "atributos_esperados": {
+        "rango_tamano_cm": [
+          22,
+          28
+        ],
+        "colores_principales": [
+          "gris"
+        ]
+      },
+      "nota": "El usuario reportó conversación no limpia; este caso aisla la descripción sin historial."
+    },
+    {
+      "id": "reg_torcaza_historial",
+      "grupo": "regresion",
+      "origen": "reproduccion_sintetica_del_fallo",
+      "consulta": "s una de las aves de la familia Columbidae más comunes y adaptables de Sudamérica.\n\nCaracterísticas principales\n\n• Tamaño: Mide entre 22 y 28 cm de largo, siendo bastante más pequeña que la paloma de ciudad (Columba livia).\n• Plumaje: Su coloración general es gris rosado o grisáceo perlado, con el vientre más claro y reflejos tornasolados o dorados en los laterales del cuello en los adultos.\n",
+      "esperado": "zenaida_auriculata",
+      "etiqueta": "Paloma torcaza, confirmada por el usuario; Zenaida auriculata en el catálogo",
+      "atributos_esperados": {
+        "rango_tamano_cm": [
+          22,
+          28
+        ],
+        "colores_principales": [
+          "gris"
+        ]
+      },
+      "nota": "Historial sintético; no reproduce mensajes anteriores reales que no se proporcionaron.",
+      "historial": [
+        {
+          "role": "user",
+          "content": "Ave de 12 cm en un parque."
+        },
+        {
+          "role": "assistant",
+          "content": "Estas son posibles opciones, con confianza baja."
+        }
+      ]
+    },
+    {
+      "id": "reg_sinsonte_sin_cobertura",
+      "grupo": "regresion",
+      "origen": "fallo_reportado_por_usuario",
+      "consulta": "es un ave paseriforme de tamaño mediano de la familia Mimidae, muy conocida por su plumaje gris y su excepcional capacidad para imitar cantos y sonidos.\n\nCaracterísticas principales\n\n• Tamaño y peso: Mide aproximadamente 25 cm de longitud y pesa cerca de 54 gramos.\n• Plumaje: Es de color gris claro en la cabeza y el dorso, con partes inferiores de tono blanquecino.\n• Alas y cola: Las alas son de color gris oscuro o negruzco con dos barras o parches blancos muy notorios al volar. La cola es larga, oscura y con las puntas o bordes blancos.\n• Pico y ojos: Posee un pico delgado, negro y ligeramente curvado, y ojos de un tono amarillo pálido o claro.\n",
+      "esperado": null,
+      "especie_reportada": "sinsonte; especie científica no confirmada",
+      "atributos_esperados": {
+        "rango_tamano_cm": [
+          20,
+          30
+        ],
+        "colores_principales": [
+          "gris",
+          "blanco"
+        ]
+      },
+      "nota": "Se exige abstención porque Mimidae no está en el catálogo. El usuario reportó conversación no limpia, sin proporcionar los mensajes previos."
+    },
+    {
+      "id": "reg_sinsonte_historial",
+      "grupo": "regresion",
+      "origen": "reproduccion_sintetica_del_fallo",
+      "consulta": "es un ave paseriforme de tamaño mediano de la familia Mimidae, muy conocida por su plumaje gris y su excepcional capacidad para imitar cantos y sonidos.\n\nCaracterísticas principales\n\n• Tamaño y peso: Mide aproximadamente 25 cm de longitud y pesa cerca de 54 gramos.\n• Plumaje: Es de color gris claro en la cabeza y el dorso, con partes inferiores de tono blanquecino.\n• Alas y cola: Las alas son de color gris oscuro o negruzco con dos barras o parches blancos muy notorios al volar. La cola es larga, oscura y con las puntas o bordes blancos.\n• Pico y ojos: Posee un pico delgado, negro y ligeramente curvado, y ojos de un tono amarillo pálido o claro.\n",
+      "esperado": null,
+      "especie_reportada": "sinsonte; especie científica no confirmada",
+      "atributos_esperados": {
+        "rango_tamano_cm": [
+          20,
+          30
+        ],
+        "colores_principales": [
+          "gris",
+          "blanco"
+        ]
+      },
+      "nota": "Historial sintético; no reproduce mensajes reales anteriores que no se proporcionaron.",
+      "historial": [
+        {
+          "role": "user",
+          "content": "Era un ave de 12 cm en un parque."
+        },
+        {
+          "role": "assistant",
+          "content": "Estas son posibles opciones, con confianza baja."
+        }
+      ]
+    },
+    {
+      "id": "reg_alaudidae_solo_familia",
+      "grupo": "regresion",
+      "origen": "fallo_reportado_por_usuario",
+      "consulta": "Alaudidae esta es la familia del ave, no me acuerdo mucho su forma",
+      "esperado": null,
+      "atributos_esperados": {
+        "rango_tamano_cm": null,
+        "colores_principales": [],
+        "dieta": [],
+        "entorno": [],
+        "vuelo": []
+      },
+      "nota": "Solo debe reconocer Alaudidae como familia sin cobertura; no hay rasgos físicos afirmados."
+    },
+    {
+      "id": "reg_alaudidae_cambio_familia",
+      "grupo": "regresion",
+      "origen": "reproduccion_del_cambio_de_familia",
+      "consulta": "Alaudidae esta es la familia del ave, no me acuerdo mucho su forma",
+      "esperado": null,
+      "atributos_esperados": {
+        "rango_tamano_cm": null,
+        "colores_principales": [],
+        "dieta": [],
+        "entorno": [],
+        "vuelo": []
+      },
+      "nota": "Reproduce la secuencia de descripciones reportada, con una respuesta previa simplificada. No debe heredar Mimidae ni los rasgos del sinsonte.",
+      "historial": [
+        {
+          "role": "user",
+          "content": "es un ave paseriforme de tamaño mediano de la familia Mimidae, muy conocida por su plumaje gris y su excepcional capacidad para imitar cantos y sonidos.\n\nCaracterísticas principales\n\n• Tamaño y peso: Mide aproximadamente 25 cm de longitud y pesa cerca de 54 gramos.\n• Plumaje: Es de color gris claro en la cabeza y el dorso, con partes inferiores de tono blanquecino.\n• Alas y cola: Las alas son de color gris oscuro o negruzco con dos barras o parches blancos muy notorios al volar. La cola es larga, oscura y con las puntas o bordes blancos.\n• Pico y ojos: Posee un pico delgado, negro y ligeramente curvado, y ojos de un tono amarillo pálido o claro.\n"
+        },
+        {
+          "role": "assistant",
+          "content": "No puedo identificar el ave con la información disponible. El catálogo actual no incluye fichas para familia: Mimidae."
+        }
+      ]
+    }
+  ]
+}

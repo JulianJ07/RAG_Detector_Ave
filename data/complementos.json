@@ -1,0 +1,22 @@
+{
+  "version": 1,
+  "nota": "Rasgos complementarios verificados; se aplican al cargar el catálogo, con evidencia propia. No sustituyen la presencia local ni las medidas de la guía de Envigado.",
+  "complementos": [
+    {
+      "id": "zenaida_auriculata",
+      "colores_adicionales": ["gris", "iridiscente"],
+      "descripcion_adicional": "También presenta tonos grises en la cabeza y el cuerpo, matices rosados en cuello y pecho y brillos metálicos en los lados del cuello.",
+      "fuente": {
+        "id": "SAG_TORTOLA_2018",
+        "titulo": "Cartilla para Cazadores, edición 2018 · ficha de Zenaida auriculata",
+        "autor_institucion": "Servicio Agrícola y Ganadero de Chile, División de Protección de los Recursos Naturales Renovables",
+        "anio": "2018",
+        "url": "https://www.sag.gob.cl/sites/default/files/cartilla_para_cazadores_2018.pdf#page=35",
+        "licencia_o_condiciones": "Consulta de hechos y paráfrasis atribuida. PDF e imágenes no incluidos en el repositorio.",
+        "fecha_consulta": "2026-11-12"
+      },
+      "localizador": "p. 34, Tórtola (Zenaida auriculata), descripción",
+      "alcance": "Complemento morfológico de la especie descrita en Chile; no se usa como evidencia de distribución local."
+    }
+  ]
+}

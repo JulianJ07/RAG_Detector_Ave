@@ -17,10 +17,10 @@ ALIAS = {
     },
     "dieta": {
         "semillas": "semillas?|granos?|granivor[oa]",
-        "insectos": "insectos?|moscas?|bichos?|gusanos?|lombrices|lombriz|insectivor[oa]",
-        "frutas": "frut[oa]s?|bayas?|frugivor[oa]|bananos?|platanos?|papayas?|mangos?",
+        "insectos": "insectos?|moscas?|bichos?|insectivor[oa]",
+        "frutas": "frut[oa]s?|bayas?|frugivor[oa]|bananos?|platanos?|papayas?|mangos?|moras?",
         "néctar": "nectar|nectarivor[oa]",
-        "peces": "peces|pescados?|pescando|pescaba|piscivor[oa]", "carroña": "carrona",
+        "peces": "peces|pescados?|pescando|pescaba|piscivor[oa]", "carroña": "carrona|carroner[oa]s?",
         "pequeños vertebrados": "pequenos vertebrados|ratones|lagartijas",
         "carnívoro": "carnivor[oa]", "omnívoro": "omnivor[oa]",
     },
@@ -79,7 +79,19 @@ def extraer_tamano(texto, tolerancia):
         despues = texto[m.end():]
         if re.search(r"(?:hasta|menos de|mas de|altitud de|envergadura de|distancia de|no media)\s*$", antes):
             continue
+        # La envergadura puede incluir «de alas de», «aproximada» o dos unidades.
+        # Se descarta esa medida, sin perder la longitud corporal de otra cláusula.
+        contexto = re.split(r"[,;\n!?]|\.(?!\d)", antes)[-1]
+        dimensiones = list(re.finditer(
+            r"\b(?:envergadura|altitud|distancia|longitud|largo|mide|media)\b", contexto,
+        ))
+        es_longitud = re.match(r"\s+(?:de\s+)?(?:longitud|largo)\b", despues)
+        if (dimensiones and dimensiones[-1][0] in {"envergadura", "altitud", "distancia"}
+                and not es_longitud):
+            continue
         if re.match(r"\s+(?:de (?:altura|envergadura|distancia)|sobre el nivel del mar|msnm)\b", despues):
+            continue
+        if re.match(r"\s+(?:de\s+)?(?:envergadura|distancia)\b", despues):
             continue
         medidas.append(m)
     if len(medidas) != 1:
@@ -106,19 +118,7 @@ def extraer_atributos(texto, tolerancia, vocabularios, extraidos=None):
     sin_tildes = normalizar(texto)
     valores = {}
     for campo, patrones in ALIAS.items():
-        datos_llm = (extraidos or {}).get(campo)
-        if isinstance(datos_llm, list):
-            permitidos = {normalizar(v): v for v in vocabularios[campo]}
-            valores[campo] = list(dict.fromkeys(
-                permitidos[normalizar(v)] for v in datos_llm if isinstance(v, str) and normalizar(v) in permitidos
-            ))
-            # Si el texto no menciona ningún color ni alimento, el modelo los completó por su cuenta.
-            if campo in CAMPOS_VERIFICADOS and not re.search(
-                rf"\b(?:{'|'.join(patrones.values())})\b", sin_tildes,
-            ):
-                valores[campo] = []
-            continue
-        valores[campo] = [
+        respaldados = [
             etiqueta for etiqueta, patron in patrones.items()
             if any(
                 not re.search(r"\b(?:no(?: era| es| tenia| vi| parecia)?|sin)(?: manchas| plumas| color)?\s*$",
@@ -126,6 +126,26 @@ def extraer_atributos(texto, tolerancia, vocabularios, extraidos=None):
                 for m in re.finditer(rf"\b(?:{patron})\b", sin_tildes)
             )
         ]
+        datos_llm = (extraidos or {}).get(campo)
+        if isinstance(datos_llm, list):
+            permitidos = {normalizar(v): v for v in vocabularios[campo]}
+            valores[campo] = []
+            for valor in datos_llm:
+                if not isinstance(valor, str):
+                    continue
+                literal = normalizar(valor).replace("_", " ") if campo in CAMPOS_VERIFICADOS else normalizar(valor)
+                etiqueta = permitidos.get(literal)
+                if campo in CAMPOS_VERIFICADOS:
+                    # NVIDIA puede devolver «gris claro» o «pardo» en vez de la etiqueta canónica.
+                    if etiqueta is None:
+                        literal = re.sub(r"\s+(?:clar[oa]|oscur[oa]|intens[oa])$", "", literal)
+                        etiqueta = next((e for e in respaldados if re.fullmatch(patrones[e], literal)), None)
+                    if etiqueta not in respaldados:
+                        continue
+                if etiqueta in permitidos.values() and etiqueta not in valores[campo]:
+                    valores[campo].append(etiqueta)
+        else:
+            valores[campo] = respaldados
     if len(valores["vuelo"]) > 1 and "otro" in valores["vuelo"]:
         valores["vuelo"].remove("otro")
     return AtributosConsulta(extraer_tamano(texto, tolerancia), **valores)
@@ -140,3 +160,47 @@ def filtrar_por_tamano(aves, rango_tamano_cm):
         id_ave for id_ave, ave in aves.items()
         if ave["longitud_min_cm"] <= maximo and ave["longitud_max_cm"] >= minimo
     ]
+
+
+def extraer_taxonomia(texto, aves=None):
+    """Reconoce taxones afirmados, incluso cuando no hay fichas de ese grupo."""
+    texto = normalizar(texto)
+    alias = {
+        "familia": {"Tyrannidae": r"tiranidos?", "Trochilidae": r"colibri(?:es|s)?"},
+        "orden": {"Passeriformes": r"paseriformes?"},
+    }
+    criterios = {}
+    for campo in ("familia", "orden"):
+        mencionados = []
+        taxones = {normalizar(taxon): taxon for taxon in alias[campo]}
+        taxones.update({normalizar(ave[campo]): ave[campo] for ave in (aves or {}).values()})
+        # Las familias y órdenes fuera del catálogo también son restricciones.
+        # Ignorarlos permitiría responder con especies de otro grupo taxonómico.
+        sufijo = "idae" if campo == "familia" else "formes"
+        for m in re.finditer(rf"\b[a-z]{{3,}}{sufijo}\b", texto):
+            literal = m[0]
+            canonico = next((taxon for taxon, patron in alias[campo].items()
+                             if re.fullmatch(patron, literal)), literal.capitalize())
+            taxones.setdefault(normalizar(canonico), canonico)
+        for taxon in sorted(taxones.values()):
+            patron = re.escape(normalizar(taxon))
+            if taxon in alias[campo]:
+                patron += "|" + alias[campo][taxon]
+            for m in re.finditer(rf"\b(?:{patron})\b", texto):
+                if re.search(
+                    r"\bno(?:\s+(?:es|son|era|eran|parecia|vi|pertenece|pertenecen|a|la|el|familia|de|los|las|un|una))*\s*$",
+                    texto[:m.start()],
+                ):
+                    continue
+                mencionados.append(taxon)
+                break
+        if mencionados:
+            criterios[campo] = mencionados
+    return criterios
+
+
+def filtrar_por_taxonomia(aves, texto, ids):
+    """Filtra solo familias y órdenes mencionados explícitamente en la descripción."""
+    criterios = extraer_taxonomia(texto, aves)
+    return ([id_ave for id_ave in ids
+             if all(aves[id_ave][campo] in valores for campo, valores in criterios.items())], criterios)
