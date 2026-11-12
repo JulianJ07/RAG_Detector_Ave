@@ -1,7 +1,6 @@
 # AvesCO · Identificación de aves del Valle de Aburrá
 
-**SI3003 Inteligencia Artificial · Opción A (RAG) · Sustentación del 17 de noviembre de 2026**  
-**Integrantes** · Completar con los nombres del equipo antes de entregar.
+**Integrantes** · Julián Jiménez y Alejandro Cifuentes
 
 ## 1. Introducción
 
