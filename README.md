@@ -1,10 +1,14 @@
 # AvesCO · Identificación de aves del Valle de Aburrá
 
-**Integrantes** · Julián Jiménez y Alejandro Cifuentes
+**Autores** · Julián Jiménez y Alejandro Cifuentes
+
+**Curso** · SI3003
+
+**Fecha** · 12 de noviembre de 2026
 
 ## 1. Introducción
 
-AvesCO ayuda a aficionados y estudiantes a reconocer aves a partir de una descripción escrita en español. Busca entre 120 especies documentadas en el Valle de Aburrá y muestra hasta tres coincidencias con referencias que se pueden abrir y revisar.
+AvesCO ayuda a aficionados y estudiantes a reconocer aves a partir de una descripción escrita en español. Las guías regionales suelen consultarse por especie, aunque la persona observadora normalmente empieza con pistas como el color, el tamaño o el lugar. AvesCO cruza esas pistas con 120 fichas del Valle de Aburrá y enlaza las fuentes para que se pueda comprobar cada sugerencia.
 
 El resultado es orientativo. El alcance comprende las especies del catálogo y las consultas de texto. El asistente se abstiene si la descripción ofrece pocos rasgos comparables o si las fichas recuperadas carecen de evidencia suficiente.
 
@@ -13,12 +17,12 @@ El resultado es orientativo. El alcance comprende las especies del catálogo y l
 **Objetivo general.** Implementar un asistente RAG que sugiera especies del Valle de Aburrá a partir de rasgos observados y cite la evidencia de cada sugerencia.
 
 1. Indexar las 120 fichas y vincular cada una con sus rasgos y fuentes.
-2. Recuperar hasta tres candidatas mediante similitud semántica, con un filtro de tamaño y una salida de abstención.
+2. Mostrar hasta tres coincidencias o hasta cuatro alternativas de confianza baja, con un filtro de tamaño y una salida de abstención.
 3. Comparar los resultados con una búsqueda por palabras en cinco consultas finales y revisar el respaldo de sus citas.
 
 ## 3. Datos
 
-El catálogo cruza registros de ocurrencia del SiB Colombia y GBIF con la guía de la SAO para Envigado, el estudio local de urbanización, la lista ACO y BIRDBASE. Las fichas ya son fragmentos de 84 a 123 palabras y se indexan completas. El preprocesamiento está descrito en el [README del dataset](data/README_datos.md) y la bibliografía con licencias está en [fuentes.csv](data/fuentes.csv).
+El catálogo cruza registros de ocurrencia del SiB Colombia y GBIF con la guía de la SAO para Envigado, el estudio local de urbanización, la lista ACO y BIRDBASE. Los registros se obtienen de las descargas indicadas en `fuentes.csv`. El equipo cruzó los nombres científicos, convirtió las longitudes a centímetros y normalizó colores, dieta y hábitat a categorías comunes. Los campos sin respaldo quedaron vacíos. Se indexa cada ficha completa para mantener juntos los rasgos de una especie. [Proceso de obtención y limpieza](data/README_datos.md) · [Fuentes y licencias](data/fuentes.csv).
 
 | Archivo | Formato y uso |
 | --- | --- |
@@ -28,16 +32,15 @@ El catálogo cruza registros de ocurrencia del SiB Colombia y GBIF con la guía 
 | `data/vocabularios.json` | Categorías para validar los atributos de entrada. |
 | `data/validacion_muestra.csv` | 15 especies para el cotejo manual del equipo. |
 
-La selección tiene un sesgo de cobertura hacia las especies descritas en Envigado y los sitios con mayor muestreo. Los colores se interpretaron de fotografías y las medidas de la guía se aproximan a la longitud total. El tipo de vuelo está vacío en las 120 fichas. Se preservan las atribuciones CC BY 4.0 y CC BY-NC 4.0 según cada fuente y las condiciones de la guía. El repositorio usa datos estructurados y referencias a la guía, cuyo PDF tiene derechos reservados.
+La selección tiene un sesgo de cobertura hacia las especies descritas en Envigado y los sitios con mayor muestreo. Los colores se interpretaron de fotografías y las medidas de la guía se aproximan a la longitud total. El tipo de vuelo está vacío en las 120 fichas. Se preservan las atribuciones CC BY 4.0 y CC BY-NC 4.0 según cada fuente y las condiciones de la guía. Se puede ejecutar con los datos estructurados incluidos. La guía tiene derechos reservados y las fotos que la interfaz puede mostrar se cargan desde archivos locales.
 
 ## 4. Metodología
 
-1. **Preparación.** Se comprueban los 120 IDs, los rangos de longitud y la procedencia de las citas. Se indexa un vector por ficha en Qdrant local. La colección se identifica con una huella del archivo y el modelo de embeddings.
-2. **Consulta.** Se extraen tamaño, colores, dieta, entorno y vuelo. Se comprueba la medida en el texto original y se convierte a centímetros. Para medidas puntuales se usa ±20 % como tolerancia inicial. Un rango explícito conserva sus extremos. Qdrant recibe solo los IDs con medidas que se solapan con el rango.
-3. **Recuperación y respuesta.** El coseno recupera hasta 14 fichas. Se revisan coincidencias y diferencias documentadas y se devuelven hasta tres. La similitud mide cercanía entre vectores. El servidor arma las respuestas a partir de campos reales y enlaza las citas correspondientes. Las opciones de confianza baja también exigen una similitud de al menos 0,02 por debajo del umbral.
-4. **Controles.** Las medidas distinguen longitud corporal de envergadura y se convierten a centímetros. El asistente comprueba los colores y la dieta contra las palabras de la descripción, y aplica los filtros de familia y orden cuando el usuario indica el grupo. La conversación conserva las aclaraciones de una observación. Si falla la API, muestra el error y permite reintentar. Las migas de pan favorecen especies urbanas granívoras u omnívoras. Las opciones tentativas requieren una similitud de al menos el umbral general menos 0,02.
-5. **Modelos.** AvesCO usa [Nemotron 3.5 Embed 1B](https://build.nvidia.com/nvidia/nemotron-3_5-embed-1b) para los vectores y [Nemotron 3.5 Lightning](https://build.nvidia.com/nvidia/nemotron-3.5-lightning-30b-a3b) para extraer atributos y seleccionar IDs. La clave NVIDIA_API_KEY es obligatoria.
-6. **Evaluación.** Se usa como línea base el solapamiento léxico del ejercicio de documentos. Se cuenta si el ID esperado aparece entre los tres primeros en los casos positivos y si hay abstención en el caso externo. Se comprueba que las URLs y localizadores pertenezcan a las fichas citadas. Las consultas de calibración y evaluación quedan fuera del índice.
+1. **Preparación.** Se validan los IDs, las medidas y las citas. Nemotron 3.5 Embed 1B genera un vector por ficha en español para recuperar especies por similitud semántica. Qdrant guarda los vectores localmente y reutiliza el índice cuando coinciden el catálogo y el modelo.
+2. **Interpretación y filtros.** Nemotron 3.5 Lightning extrae atributos en JSON. Se comprueban colores, dieta y medidas contra la descripción. Se conserva un intervalo explícito y se usa ±20 % para una medida puntual, por la incertidumbre al estimar el tamaño. Se filtra por tamaño, familia u orden cuando hay pistas aplicables.
+3. **Recuperación y respuesta.** Se ordenan por coseno las fichas elegibles. Se revisan las primeras 14 para coincidencias, con una excepción para candidatas urbanas compatibles con comida humana. El modelo puede seleccionar hasta tres entre las cinco mejor respaldadas. El umbral general es 0,26. Las alternativas tentativas requieren al menos 0,24 y se limitan a cuatro. Una ficha puede entrar hasta 0,06 por debajo del umbral general cuando su longitud cabe en el intervalo escrito, coincide en tres o más colores y carece de diferencias comparables. La similitud expresa cercanía entre vectores.
+4. **Evaluación.** Se calibró el umbral con cuatro consultas separadas de los cinco casos finales. La línea base cuenta palabras compartidas entre la consulta y las fichas. Se mide acierto entre los primeros tres resultados para las cuatro consultas positivas, abstención para la consulta externa y correspondencia de las citas con la evidencia del catálogo. Las consultas quedan fuera del índice.
+5. **Ejecución.** Se usan los modelos de NVIDIA NIM ya entrenados. Gradio muestra en el navegador los resultados citados, mantiene las aclaraciones de una misma observación y puede mostrar fotos locales. La API de NVIDIA requiere una clave e internet.
 
 **Flujo metodológico**
 
@@ -47,17 +50,27 @@ flowchart LR
     B --> C["Embeddings de fichas"]
     C --> D["Qdrant local"]
     U["Descripción"] --> E["Extraer atributos y convertir medidas"]
-    E --> F["Filtrar por tamaño"]
+    E --> F["Filtrar por tamaño, familia y orden"]
     E --> Q["Embedding de consulta"]
     F --> G["Recuperar candidatas"]
     Q --> G
     D --> G
     G --> H{"¿Hay evidencia suficiente?"}
-    H -->|Sí| I["Hasta tres especies con fuentes"]
-    H -->|No| J["Abstención y pregunta aclaratoria"]
+    H -->|Suficiente| I["Hasta tres coincidencias con fuentes"]
+    H -->|Parcial| T["Hasta cuatro alternativas tentativas"]
+    H -->|Insuficiente| J["Abstención y pregunta aclaratoria"]
+    I --> V["Resultado en Gradio"]
+    T --> V
+    J --> V
+    K["Cinco consultas finales"] --> U
+    K --> L["Línea base por palabras"]
+    V --> R["Comparar aciertos, abstención y citas"]
+    L --> R
 ```
 
-## 5. Diagrama de interacción
+## 5. Diagrama de interacción (UML)
+
+**Secuencia de una consulta con el índice disponible**
 
 ```mermaid
 sequenceDiagram
@@ -71,7 +84,7 @@ sequenceDiagram
     W->>A: Identifica el ave
     A->>M: Solicita atributos en JSON
     M-->>A: Devuelve los atributos
-    A->>C: Lee medidas y calcula IDs elegibles
+    A->>C: Consulta medidas, familia y orden
     alt Hay suficientes rasgos y candidatas
         A->>M: Solicita el embedding de consulta
         M-->>A: Devuelve el vector
@@ -82,22 +95,28 @@ sequenceDiagram
             A->>M: Solicita selección de IDs recuperados
             M-->>A: Devuelve IDs seleccionados
         end
-        A-->>W: Coincidencias citadas o abstención
+        A-->>W: Coincidencias, alternativas tentativas o abstención
     else Faltan pistas o candidatas
         A-->>W: Abstención y pregunta aclaratoria
     end
-    W-->>U: Muestra el resultado
+    W-->>U: Muestra resultado, fuentes y fotos disponibles
 ```
 
 ## 6. Resultados
 
-El umbral general de similitud coseno es **0,26**. Se ajustó el umbral con cuatro consultas separadas de los casos finales. Las dos especies esperadas aparecieron entre las candidatas y el asistente se abstuvo en los dos casos negativos. Con NVIDIA, una ficha puede quedar hasta **0,06** por debajo del umbral general si su tamaño está dentro del intervalo escrito, coincide en al menos tres colores y no hay diferencias en los rasgos comparables. Se puede ajustar el umbral general de NVIDIA con `UMBRAL_NVIDIA`.
+| Caso | Resultado esperado | Línea base | AvesCO con NVIDIA |
+| --- | --- | --- | --- |
+| Ave roja con alas negras de 13 cm | *Pyrocephalus rubinus* | No | Sí |
+| Ave de pecho azul violáceo de 33 cm en humedal | *Porphyrio martinica* | Sí | Sí |
+| Ave gris azulada de 16 cm que comía frutas | *Thraupis episcopus* | Sí | Sí |
+| Ave de vientre amarillo con ceja blanca de 21–23 cm | *Pitangus sulphuratus* | No | Sí |
+| Ave negra y blanca de 110–120 cm sobre hielo | Abstención | No | Sí |
+| **Identificaciones entre las tres primeras** | **4 casos** | **2/4** | **4/4** |
+| **Abstención** | **1 caso** | **0/1** | **1/1** |
 
-[Consultas completas](evaluacion/casos.json).
+Las cuatro respuestas con especies incluyeron citas con URL y localizador que corresponden a las fichas. [Consultas completas](evaluacion/casos.json) · [Resultados registrados](evaluacion/resultados_nvidia.json).
 
-Con la API de NVIDIA, AvesCO acertó **4/4** identificaciones y se abstuvo en **1/1** caso externo. El caso del Bichofué Común sirvió para ajustar la regla de tamaño y colores, por lo que su resultado ilustra el ajuste y requiere validación con observaciones nuevas. [Respuestas y puntajes con NVIDIA](evaluacion/resultados_nvidia.json).
-
-El caso de tamaño excluyó a la Suelda Crestinegra de 17 cm. El Bichofué Común de 22 cm quedó primero y el Bichofué Picudo de 23 cm segundo. Ambos caben en el intervalo y comparten rasgos descritos. Una mejora sería pedir una pista del pico cuando varias fichas coincidan en los rasgos principales. Cinco casos ilustran el comportamiento del prototipo y dejan pendiente una evaluación con más observaciones independientes.
+El filtro de tamaño dejó fuera a la Suelda Crestinegra de 17 cm. El Bichofué Común de 22 cm quedó primero y el Bichofué Picudo de 23 cm segundo, porque ambos encajan en las medidas y el plumaje descrito. Ese caso también sirvió para ajustar la regla de tamaño y color. Una pista sobre el pico ayudaría a distinguirlos. Los cinco casos ilustran el comportamiento del prototipo y dejan pendiente una evaluación con observaciones independientes.
 
 ## 7. Reproducibilidad
 
@@ -108,7 +127,7 @@ python -m venv .venv
 .venv/Scripts/python.exe -m pip install -r requirements.txt
 ```
 
-Crea `.env` a partir de `.env.example` y completa `NVIDIA_API_KEY`. Inicia la interfaz:
+Copia `.env.example` a `.env` y completa `NVIDIA_API_KEY`. Con conexión a internet, ejecuta:
 
 ```powershell
 .venv/Scripts/python.exe app.py --puerto 7861
@@ -121,9 +140,15 @@ Para reconstruir el índice o evaluar, detén primero la app si está usando el 
 ```powershell
 .venv/Scripts/python.exe -m avesco.indice
 .venv/Scripts/python.exe evaluar.py --calibracion
-.venv/Scripts/python.exe evaluar.py --salida evaluacion/resultados_nvidia.json
+.venv/Scripts/python.exe evaluar.py
 .venv/Scripts/python.exe -m pip install -r requirements-dev.txt
 .venv/Scripts/python.exe -m pytest -q
 ```
 
-`app.py` contiene la interfaz, `avesco/` el pipeline, `data/` los datos y sus fuentes, `evaluacion/` los casos y resultados, y `tests/` las pruebas. `.avesco/` almacena el índice. `.env` guarda la configuración privada.
+| Ruta | Contenido |
+| --- | --- |
+| `app.py` y `avesco/` | Interfaz Gradio y código del asistente. |
+| `data/` y `scripts/` | Catálogo, evidencias y preparación del dataset. |
+| `evaluacion/`, `evaluar.py` y `evaluar_robustez.py` | Casos, resultados y evaluadores. |
+| `tests/` | Pruebas automatizadas. |
+| `.env` y `.avesco/` | Configuración privada e índice local, excluidos de Git. |
