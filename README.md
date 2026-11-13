@@ -40,31 +40,33 @@ La selección tiene un sesgo de cobertura hacia las especies descritas en Enviga
 4. **Evaluación.** Se calibró el umbral con cuatro consultas separadas de los cinco casos finales. La línea base cuenta palabras compartidas entre la consulta y las fichas. Se mide acierto entre los primeros tres resultados para las cuatro consultas positivas, abstención para la consulta externa y correspondencia de las citas con la evidencia del catálogo. Las consultas quedan fuera del índice.
 5. **Ejecución.** Se usan los modelos de NVIDIA NIM ya entrenados. Gradio muestra en el navegador los resultados citados, mantiene las aclaraciones de una misma observación y puede mostrar fotos locales. La API de NVIDIA requiere una clave e internet.
 
-**Flujo metodológico**
+**Flujo metodológico de AvesCO**
 
 ```mermaid
-flowchart LR
-    A["Fichas y citas"] --> B["Validar 120 IDs"]
-    B --> C["Embeddings de fichas"]
-    C --> D["Qdrant local"]
-    U["Descripción"] --> E["Extraer atributos y convertir medidas"]
-    E --> F["Filtrar por tamaño, familia y orden"]
-    E --> Q["Embedding de consulta"]
-    F --> G["Recuperar candidatas"]
-    Q --> G
-    D --> G
-    G --> H{"¿Hay evidencia suficiente?"}
-    H -->|Suficiente| I["Hasta tres coincidencias con fuentes"]
-    H -->|Parcial| T["Hasta cuatro alternativas tentativas"]
-    H -->|Insuficiente| J["Abstención y pregunta aclaratoria"]
-    I --> X["Explicación del LLM por especie con evidencia aislada"]
-    T --> X
-    X --> V["Resultado en Gradio"]
-    J --> V
-    K["Cinco consultas finales"] --> U
-    K --> L["Línea base por palabras"]
-    V --> R["Comparar aciertos, abstención y citas"]
-    L --> R
+flowchart TD
+    fichas["120 fichas con fuentes"] --> indice["Validar e indexar en Qdrant"]
+    consulta["Descripción del ave"] --> filtros["Extraer rasgos y filtrar por tamaño, familia y orden"]
+    filtros --> elegibles{"¿Hay pistas y fichas elegibles?"}
+
+    elegibles -->|Sí| buscar["Generar el embedding y recuperar fichas"]
+    indice --> buscar
+    buscar --> evidencia{"¿Qué respalda la evidencia?"}
+
+    evidencia -->|Suficiente| coincidencias["Hasta 3 coincidencias"]
+    evidencia -->|Parcial| tentativas["Hasta 4 opciones tentativas"]
+    coincidencias --> respuesta["Añadir citas y validar la explicación por especie"]
+    tentativas --> respuesta
+
+    elegibles -->|No| abstencion["Abstenerse y pedir más pistas"]
+    evidencia -->|Insuficiente| abstencion
+    respuesta --> salida["Resultado de AvesCO"]
+    abstencion --> salida
+    salida --> interfaz["Mostrar en Gradio"]
+
+    casos["5 consultas finales"] --> consulta
+    casos --> base["Búsqueda por palabras"]
+    base --> evaluacion["Comparar aciertos, abstención y citas"]
+    salida --> evaluacion
 ```
 
 ## 5. Diagrama de interacción (UML)
