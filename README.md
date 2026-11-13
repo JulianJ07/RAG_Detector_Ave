@@ -69,41 +69,49 @@ flowchart LR
 
 ## 5. Diagrama de interacción (UML)
 
-**Secuencia de una consulta con el índice disponible**
+**Secuencia de una consulta en AvesCO**
 
 ```mermaid
 sequenceDiagram
-    actor U as Persona usuaria
-    participant W as Gradio en localhost
-    participant A as Asistente AvesCO
-    participant M as NVIDIA NIM
-    participant Q as Qdrant local
-    participant C as Catálogo y evidencias
-    U->>W: Envía una descripción
-    W->>A: Identifica el ave
-    A->>M: Solicita atributos en JSON
-    M-->>A: Devuelve los atributos
-    A->>C: Consulta medidas, familia y orden
-    alt Hay suficientes rasgos y candidatas
-        A->>M: Solicita el embedding de consulta
-        M-->>A: Devuelve el vector
-        A->>Q: Busca por coseno entre los IDs elegibles
-        Q-->>A: Devuelve candidatas y puntajes
-        A->>C: Verifica rasgos y obtiene citas
-        opt Hay candidatas respaldadas
-            A->>M: Solicita selección de IDs recuperados
-            M-->>A: Devuelve IDs seleccionados
+    actor U as Usuario
+    participant G as Gradio
+    participant A as AvesCO
+    participant N as NVIDIA NIM
+    participant Q as Qdrant
+    participant C as Catálogo
+
+    U->>G: Describe el ave
+    G->>A: Envía la observación
+    A->>N: Solicita atributos
+    N-->>A: Devuelve los rasgos
+    A->>C: Filtra por tamaño y taxonomía
+    C-->>A: Devuelve fichas elegibles
+
+    opt Hay pistas y fichas elegibles
+        A->>N: Solicita el embedding de la consulta
+        N-->>A: Devuelve el vector
+        A->>Q: Busca fichas entre los IDs elegibles
+        Q-->>A: Devuelve candidatas y similitudes
+        A->>A: Compara los rasgos con las fichas
+        opt Hay candidatas para selección
+            A->>N: Solicita seleccionar especies
+            N-->>A: Devuelve los IDs seleccionados
         end
-        opt Hay especies para mostrar
-            A->>M: Solicita por especie una explicación con su evidencia aislada
-            M-->>A: Devuelve el texto
-            A->>A: Valida el texto contra las fichas
-        end
-        A-->>W: Coincidencias, explicación, alternativas tentativas o abstención
-    else Faltan pistas o candidatas
-        A-->>W: Abstención y pregunta aclaratoria
     end
-    W-->>U: Muestra resultado, fuentes y fotos disponibles
+
+    alt Hay especies para mostrar
+        A->>C: Consulta las citas de las especies elegidas
+        C-->>A: Devuelve las fuentes
+        loop Por cada especie elegida
+            A->>N: Envía solo sus rasgos coincidentes
+            N-->>A: Devuelve una explicación breve
+            A->>A: Valida la explicación
+        end
+        A-->>G: Envía coincidencias u opciones tentativas con citas
+    else Evidencia insuficiente
+        A-->>G: Envía una abstención
+    end
+    G-->>U: Muestra el resultado
 ```
 
 ## 6. Resultados
