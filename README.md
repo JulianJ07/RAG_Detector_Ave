@@ -36,7 +36,7 @@ La selección tiene un sesgo de cobertura hacia las especies descritas en Enviga
 
 1. **Preparación.** Se validan los IDs, las medidas y las citas. Nemotron 3.5 Embed 1B genera un vector por ficha en español para recuperar especies por similitud semántica. Qdrant guarda los vectores localmente y reutiliza el índice cuando coinciden el catálogo y el modelo.
 2. **Interpretación y filtros.** Nemotron 3.5 Lightning extrae atributos en JSON. Se comprueban colores, dieta y medidas contra la descripción. Se conserva un intervalo explícito y se usa ±20 % para una medida puntual, por la incertidumbre al estimar el tamaño. Se filtra por tamaño, familia u orden cuando hay pistas aplicables.
-3. **Recuperación y respuesta.** Se ordenan por coseno las fichas elegibles. Se revisan las primeras 14 para coincidencias, con una excepción para candidatas urbanas compatibles con comida humana. El modelo puede seleccionar hasta tres entre las cinco mejor respaldadas. El umbral general es 0,26. Las alternativas tentativas requieren al menos 0,24 y se limitan a cuatro. Una ficha puede entrar hasta 0,06 por debajo del umbral general cuando su longitud cabe en el intervalo escrito, coincide en tres o más colores y carece de diferencias comparables. La similitud expresa cercanía entre vectores. Con las fichas ya elegidas, Nemotron 3.5 Lightning redacta una explicación breve que solo puede usar el texto de esas fichas, sus coincidencias y sus diferencias. El servidor la descarta si menciona otras especies, enlaces o cifras ausentes de las fichas. Las citas salen del catálogo. Si la explicación falla o se descarta, las fichas y sus citas se conservan.
+3. **Recuperación y respuesta.** Se ordenan por coseno las fichas elegibles. Se revisan las primeras 14 para coincidencias, con una excepción para candidatas urbanas compatibles con comida humana. El modelo puede seleccionar hasta tres entre las cinco mejor respaldadas. El umbral general es 0,26. Las alternativas tentativas requieren al menos 0,24 y se limitan a cuatro. Una ficha puede entrar hasta 0,06 por debajo del umbral general cuando su longitud cabe en el intervalo escrito, coincide en tres o más colores y carece de diferencias comparables. La similitud expresa cercanía entre vectores. Con las fichas ya elegidas, Nemotron 3.5 Lightning redacta hasta 35 palabras por especie en llamadas independientes. Cada llamada recibe solo las coincidencias de esa candidata, sin la consulta libre, nombres, medidas ni otras fichas. El programa coloca nombres, tamaños, citas y las pistas exactas pendientes de contrastar. El LLM no decide ni reformula esos pendientes. Los controles rechazan, entre otros, claves internas, cifras, nombres y rasgos ajenos a esa evidencia; no constituyen una verificación semántica completa. Si un borrador falla, se conservan las fichas, sus citas y las explicaciones válidas de las demás candidatas. Las descripciones con solo tamaño, comida y entorno, sin colores, nombre ni familia explícitos, producen como máximo opciones tentativas y solicitan más pistas.
 4. **Evaluación.** Se calibró el umbral con cuatro consultas separadas de los cinco casos finales. La línea base cuenta palabras compartidas entre la consulta y las fichas. Se mide acierto entre los primeros tres resultados para las cuatro consultas positivas, abstención para la consulta externa y correspondencia de las citas con la evidencia del catálogo. Las consultas quedan fuera del índice. El evaluador también registra cuántas explicaciones pasaron la validación.
 5. **Ejecución.** Se usan los modelos de NVIDIA NIM ya entrenados. Gradio muestra en el navegador los resultados citados, mantiene las aclaraciones de una misma observación y puede mostrar fotos locales. La API de NVIDIA requiere una clave e internet.
 
@@ -57,7 +57,7 @@ flowchart LR
     H -->|Suficiente| I["Hasta tres coincidencias con fuentes"]
     H -->|Parcial| T["Hasta cuatro alternativas tentativas"]
     H -->|Insuficiente| J["Abstención y pregunta aclaratoria"]
-    I --> X["Explicación del LLM con las fichas elegidas"]
+    I --> X["Explicación del LLM por especie con evidencia aislada"]
     T --> X
     X --> V["Resultado en Gradio"]
     J --> V
@@ -95,7 +95,7 @@ sequenceDiagram
             M-->>A: Devuelve IDs seleccionados
         end
         opt Hay especies para mostrar
-            A->>M: Solicita una explicación con las fichas elegidas
+            A->>M: Solicita por especie una explicación con su evidencia aislada
             M-->>A: Devuelve el texto
             A->>A: Valida el texto contra las fichas
         end

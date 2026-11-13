@@ -27,7 +27,7 @@ ALIAS = {
         "carnívoro": "carnivor[oa]", "omnívoro": "omnivor[oa]",
     },
     "entorno": {
-        "parque_jardin": "parques?|jardin(?:es)?", "urbano": "urban[oa]s?|ciudad|barrios?|edificios?",
+        "parque_jardin": "parques?|jardin(?:es)?|(?:zonas?|areas?|espacios?) verdes?", "urbano": "urban[oa]s?|ciudad|barrios?|edificios?",
         "bosque": "bosques?", "bosque_andino": "bosques? andinos?",
         "bosque_humedo": "bosques? humedos?", "herbazal": "herbazal(?:es)?|pastizal(?:es)?",
         "matorral": "matorral(?:es)?", "humedal": "humedal(?:es)?|pantanos?|cienagas?",
@@ -65,6 +65,11 @@ def tokens(texto):
     # Captura palabras como «parque» para comparar términos normalizados.
     # Conserva palabras como «parque» y descarta términos de menos de tres letras.
     return set(re.findall(r"[a-z]{3,}", normalizar(texto)))
+
+
+def texto_para_colores(texto):
+    """En «zonas verdes», verde describe el entorno y no el plumaje."""
+    return re.sub(r"\b(?:zonas?|areas?|espacios?) verdes?\b", "", normalizar(texto))
 
 
 def a_centimetros(numero, unidad):
@@ -133,15 +138,16 @@ def extraer_atributos(texto, tolerancia, vocabularios, extraidos=None):
     # Separa los valores respaldados del texto que propone NVIDIA.
     valores = {}
     for campo, patrones in ALIAS.items():
+        verificado = texto_para_colores(sin_tildes) if campo == "colores_principales" else sin_tildes
         # Busca alias como «pardas» y evita negaciones como «sin manchas negras».
         respaldados = [
             etiqueta for etiqueta, patron in patrones.items()
             if any(
                 # Evita tomar «sin manchas negras» como una observación afirmativa.
                 not re.search(r"\b(?:no(?: era| es| tenia| vi| parecia)?|sin)(?: manchas| plumas| color)?\s*$",
-                              sin_tildes[:m.start()])
+                              verificado[:m.start()])
                 # Busca una etiqueta completa, como «gris», dentro de la observación.
-                for m in re.finditer(rf"\b(?:{patron})\b", sin_tildes)
+                for m in re.finditer(rf"\b(?:{patron})\b", verificado)
             )
         ]
         datos_llm = (extraidos or {}).get(campo)

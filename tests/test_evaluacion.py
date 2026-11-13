@@ -1,11 +1,13 @@
 # Prueba las métricas y los diagnósticos sin consultar la API.
 from copy import deepcopy
+from types import SimpleNamespace
 
 import pytest
 
-from avesco.configuracion import RAIZ
+from avesco.configuracion import RAIZ, Configuracion
+from avesco.asistente import AsistenteAves
 from avesco.datos import Catalogo
-from avesco.evaluacion import revisar, resumir
+from avesco.evaluacion import revisar, resumir, ChatObservado
 from evaluar_robustez import cargar_casos
 
 
@@ -13,6 +15,32 @@ from evaluar_robustez import cargar_casos
 def catalogo():
     # Carga el mismo catálogo para las comprobaciones de este módulo.
     return Catalogo.cargar()
+
+
+def test_evaluador_no_omite_la_generacion_del_llm(catalogo):
+    traza = {}
+    entradas = []
+
+    def chat_json(_instrucciones, entrada):
+        if "vocabulario" in entrada:
+            return {"colores_principales": ["gris", "amarillo"], "dieta": ["insectos"]}
+        return {"ids": ["tyrannus_melancholicus"]}
+
+    def chat_texto(_instrucciones, entrada):
+        entradas.append(entrada)
+        return "Coincide en gris, amarillo e insectos. El tamaño encaja en el rango considerado."
+
+    modelo = ChatObservado(SimpleNamespace(chat_json=chat_json, chat_texto=chat_texto), traza)
+    indice = SimpleNamespace(retrieve_relevant_chunks=lambda *_a, **_k: [("tyrannus_melancholicus", .91)])
+    config = Configuracion("", "chat-prueba", "embed-prueba", .2, .26)
+    r = AsistenteAves(config, catalogo, indice, modelo).responder(
+        "Ave de 22 cm, cabeza gris, vientre amarillo y comía insectos."
+    )
+    assert r["explicacion"]
+    assert traza["borrador_explicacion"] == r["aves"][0]["explicacion"]
+    assert entradas == [traza["entrada_explicacion"]]
+    assert set(entradas[0]) == {"coincidencias"}
+    assert traza["explicaciones"] == [{"entrada": entradas[0], "borrador": r["aves"][0]["explicacion"]}]
 
 
 def respuesta_para(catalogo, ids, estado="coincidencias"):
@@ -73,7 +101,7 @@ def test_opciones_tentativas_no_son_identificacion_firme(catalogo):
 def test_reserva_no_se_ejecuta_por_defecto(catalogo):
     # Comprueba reserva no se ejecuta por defecto.
     casos = cargar_casos(RAIZ / "evaluacion/casos_robustez.json", ["regresion", "desarrollo"], catalogo)
-    assert len(casos) == 26
+    assert len(casos) == 54
     assert all(c["grupo"] != "reserva" for c in casos)
 
 

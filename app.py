@@ -94,12 +94,14 @@ def formatear_respuesta(resultado):
     partes = [resultado["mensaje"]]
     if resultado["nota"]:
         partes.append(resultado["nota"])
-    if resultado.get("explicacion"):
+    if resultado.get("explicacion") and not any(a.get("explicacion") for a in resultado["aves"]):
         partes.append("**Por qué estas especies**\n" + resultado["explicacion"])
     # Presenta las especies en el mismo orden que entregó el asistente.
     for i, ave in enumerate(resultado["aves"], start=1):
         partes.append(f"### {i}. {ave['nombre_comun']}\n*{ave['nombre_cientifico']}*")
         partes.append(f"**Tamaño en la guía** · {ave['tamano']}  \n{ave['plumaje']}.")
+        if ave.get("explicacion"):
+            partes.append("**Por qué puede coincidir**\n" + ave["explicacion"])
         for razon in ave["coincidencias"] + ave["diferencias"]:
             partes.append(f"- {razon}")
         citas = []

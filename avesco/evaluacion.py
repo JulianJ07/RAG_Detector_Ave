@@ -33,6 +33,14 @@ class ChatObservado:
         self.traza[etapa] = respuesta
         return respuesta
 
+    def chat_texto(self, instrucciones, entrada, **argumentos):
+        """Conserva la generación real al evaluar el asistente instrumentado."""
+        self.traza["entrada_explicacion"] = entrada
+        respuesta = self.modelo.chat_texto(instrucciones, entrada, **argumentos)
+        self.traza["borrador_explicacion"] = respuesta
+        self.traza.setdefault("explicaciones", []).append({"entrada": entrada, "borrador": respuesta})
+        return respuesta
+
 
 def revisar(caso, respuesta, catalogo, traza):
     """Señala síntomas y la primera etapa observable; no demuestra causalidad."""

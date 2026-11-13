@@ -505,6 +505,281 @@
           "content": "No puedo identificar el ave con la información disponible. El catálogo actual no incluye fichas para familia: Mimidae."
         }
       ]
+    },
+    {
+      "id": "nueva_caravana",
+      "grupo": "desarrollo",
+      "tipo": "descripcion_nueva",
+      "origen": "descripcion_sintetica_adicional_catalogo",
+      "consulta": "En un pastizal observé un ave de 37 cm. Tenía la frente negra, cabeza gris, pecho negro y la zona del vientre blanca. Las alas parecían pardas.",
+      "esperado": "vanellus_chilensis"
+    },
+    {
+      "id": "nuevo_coquito",
+      "grupo": "desarrollo",
+      "tipo": "descripcion_nueva",
+      "origen": "descripcion_sintetica_adicional_catalogo",
+      "consulta": "Ave de la familia Threskiornithidae, de unos 55 cm, casi negra pero con destellos azulados en las alas. Buscaba insectos en el pasto de un parque.",
+      "esperado": "phimosus_infuscatus"
+    },
+    {
+      "id": "nueva_garza_real",
+      "grupo": "desarrollo",
+      "tipo": "descripcion_nueva",
+      "origen": "descripcion_sintetica_adicional_catalogo",
+      "consulta": "En el borde de una laguna había un ave de entre 85 y 105 cm, con cuello, cabeza y cuerpo completamente blancos. La familia era Ardeidae.",
+      "esperado": "ardea_alba"
+    },
+    {
+      "id": "nueva_garza_nuca",
+      "grupo": "desarrollo",
+      "tipo": "descripcion_nueva",
+      "origen": "descripcion_sintetica_adicional_catalogo",
+      "consulta": "Vi una Ardeidae blanca, de 60 cm, con un grupo de plumas blancas muy delgadas y largas saliendo de la nuca, junto a un humedal.",
+      "esperado": "egretta_thula"
+    },
+    {
+      "id": "nuevo_guaco",
+      "grupo": "desarrollo",
+      "tipo": "descripcion_nueva",
+      "origen": "descripcion_sintetica_adicional_catalogo",
+      "consulta": "Ave de unos 65 cm en un humedal: dorso y parte superior de la cabeza oscuros, alas grises y garganta clara. De la nuca salían unas plumas blancas finas.",
+      "esperado": "nycticorax_nycticorax"
+    },
+    {
+      "id": "nuevo_barranquero",
+      "grupo": "desarrollo",
+      "tipo": "descripcion_nueva",
+      "origen": "descripcion_sintetica_adicional_catalogo",
+      "consulta": "Medía unos 48 cm. Era verde, tenía una máscara negra con borde azul y una cola muy larga que terminaba en dos raquetas.",
+      "esperado": "momotus_aequatorialis"
+    },
+    {
+      "id": "nuevo_pescador",
+      "grupo": "desarrollo",
+      "tipo": "descripcion_nueva",
+      "origen": "descripcion_sintetica_adicional_catalogo",
+      "consulta": "Cerca de una laguna vi un ave de 40 cm que capturaba peces. Tenía cresta, garganta blanca, espalda gris azulada y el pecho castaño.",
+      "esperado": "megaceryle_torquata"
+    },
+    {
+      "id": "nuevo_buchipecoso",
+      "grupo": "desarrollo",
+      "tipo": "descripcion_nueva",
+      "origen": "descripcion_sintetica_adicional_catalogo",
+      "consulta": "Vi una Picidae de 20 cm, con vientre amarillo salpicado de puntos negros, nuca roja y una pequeña zona roja en la mejilla. Picoteaba insectos.",
+      "esperado": "colaptes_punctigula"
+    },
+    {
+      "id": "nuevo_robledales",
+      "grupo": "desarrollo",
+      "tipo": "descripcion_nueva",
+      "origen": "descripcion_sintetica_adicional_catalogo",
+      "consulta": "Picidae de 23 cm, oscura y de cara blanquecina, con rayas en el pecho. La coronilla era roja. La vi buscando insectos.",
+      "esperado": "melanerpes_formicivorus"
+    },
+    {
+      "id": "nuevo_torito",
+      "grupo": "desarrollo",
+      "tipo": "descripcion_nueva",
+      "origen": "descripcion_sintetica_adicional_catalogo",
+      "consulta": "En el borde de un bosque vi un ave de 15,5 cm. Tenía las alas verdes, la cara roja y el pecho dorado. Comía fruta.",
+      "esperado": "eubucco_bourcierii"
+    },
+    {
+      "id": "nuevo_periquito_bronce",
+      "grupo": "desarrollo",
+      "tipo": "descripcion_nueva",
+      "origen": "descripcion_sintetica_adicional_catalogo",
+      "consulta": "Un ave verde de 18,5 cm comía frutas en un parque. El ala tenía un parche bronceado y plumas de azul suave hacia el borde.",
+      "esperado": "brotogeris_jugularis"
+    },
+    {
+      "id": "nuevo_periquito_ojos",
+      "grupo": "desarrollo",
+      "tipo": "descripcion_nueva",
+      "origen": "descripcion_sintetica_adicional_catalogo",
+      "consulta": "Era una Psittacidae pequeña, de 12,5 cm, con cuerpo verde y una mancha azul alrededor del ojo y también en el ala. Se alimentaba de semillas.",
+      "esperado": "forpus_conspicillatus"
+    },
+    {
+      "id": "nuevo_cacique",
+      "grupo": "desarrollo",
+      "tipo": "descripcion_nueva",
+      "origen": "descripcion_sintetica_adicional_catalogo",
+      "consulta": "En un bosque húmedo vi un ave de 31 cm, negra, con rojo muy vivo únicamente en la parte baja del vientre. Estaba comiendo fruta.",
+      "esperado": "hypopyrrhus_pyrohypogaster"
+    },
+    {
+      "id": "nueva_silga",
+      "grupo": "desarrollo",
+      "tipo": "descripcion_nueva",
+      "origen": "descripcion_sintetica_adicional_catalogo",
+      "consulta": "Ave de 11 cm en un jardín, tomando néctar. Tenía ceja blanca muy marcada sobre la cabeza oscura, garganta gris clara y vientre amarillo.",
+      "esperado": "coereba_flaveola"
+    },
+    {
+      "id": "nuevo_pinche",
+      "grupo": "desarrollo",
+      "tipo": "descripcion_nueva",
+      "origen": "descripcion_sintetica_adicional_catalogo",
+      "consulta": "En una zona urbana vi un ave de 12,5 cm recogiendo semillas. Tenía cabeza gris rayada de negro, garganta blanca y un collar canela a los lados del cuello.",
+      "esperado": "zonotrichia_capensis"
+    },
+    {
+      "id": "nueva_torcaza",
+      "grupo": "desarrollo",
+      "tipo": "descripcion_nueva",
+      "origen": "descripcion_sintetica_adicional_catalogo",
+      "consulta": "Columbidae de entre 22 y 28 cm: gris con tonos pardos rosados y manchas negras en el ala. Se apreciaban brillos metálicos a los lados del cuello.",
+      "esperado": "zenaida_auriculata"
+    },
+    {
+      "id": "nuevo_fuera_spheniscidae",
+      "grupo": "desarrollo",
+      "tipo": "negativa_o_ambigua",
+      "origen": "descripcion_sintetica_adicional_catalogo",
+      "consulta": "Familia Spheniscidae. Ave de unos 90 cm con blanco y negro, de pie sobre el hielo.",
+      "esperado": null
+    },
+    {
+      "id": "nuevo_fuera_psittacidae",
+      "grupo": "desarrollo",
+      "tipo": "negativa_o_ambigua",
+      "origen": "descripcion_sintetica_adicional_catalogo",
+      "consulta": "Era de la familia Psittacidae, de entre 110 y 130 cm de longitud, verde y azul.",
+      "esperado": null
+    },
+    {
+      "id": "nueva_familia_ausente",
+      "grupo": "desarrollo",
+      "tipo": "negativa_o_ambigua",
+      "origen": "descripcion_sintetica_adicional_catalogo",
+      "consulta": "El ave pertenece a la familia Phoenicopteridae. No recuerdo otros detalles.",
+      "esperado": null
+    },
+    {
+      "id": "nuevo_solo_vuelo",
+      "grupo": "desarrollo",
+      "tipo": "negativa_o_ambigua",
+      "origen": "descripcion_sintetica_adicional_catalogo",
+      "consulta": "Solo pude ver que planeaba y volaba en círculos; no recuerdo tamaño ni colores.",
+      "esperado": null
+    },
+    {
+      "id": "nuevo_ambiguo_fruta",
+      "grupo": "desarrollo",
+      "tipo": "negativa_o_ambigua",
+      "origen": "descripcion_sintetica_adicional_catalogo",
+      "consulta": "Un ave de unos 15 cm estaba comiendo frutas en un parque. No vi cómo era su plumaje.",
+      "esperado": null,
+      "estados_permitidos": [
+        "abstencion",
+        "tentativas"
+      ]
+    },
+    {
+      "id": "nuevo_ambiguo_semillas",
+      "grupo": "desarrollo",
+      "tipo": "negativa_o_ambigua",
+      "origen": "descripcion_sintetica_adicional_catalogo",
+      "consulta": "Vi un ave de 12 cm recogiendo semillas en el suelo. No pude distinguir ningún color.",
+      "esperado": null,
+      "estados_permitidos": [
+        "abstencion",
+        "tentativas"
+      ]
+    },
+    {
+      "id": "nuevo_ambiguo_humedal",
+      "grupo": "desarrollo",
+      "tipo": "negativa_o_ambigua",
+      "origen": "descripcion_sintetica_adicional_catalogo",
+      "consulta": "Un ave de unos 40 cm estaba en un humedal. No recuerdo colores ni otras características.",
+      "esperado": null,
+      "estados_permitidos": [
+        "abstencion",
+        "tentativas"
+      ]
+    },
+    {
+      "id": "nuevo_ambiguo_migas",
+      "grupo": "desarrollo",
+      "tipo": "negativa_o_ambigua",
+      "origen": "descripcion_sintetica_adicional_catalogo",
+      "consulta": "Un ave comía migas de pan junto a una tienda. No alcancé a observar el color.",
+      "esperado": null,
+      "estados_permitidos": [
+        "abstencion",
+        "tentativas"
+      ]
+    },
+    {
+      "id": "contexto_verde_semillas",
+      "consulta": "Vi un ave de 13 cm recogiendo semillas en una zona verde. No distinguí su plumaje.",
+      "esperado": null,
+      "estados_permitidos": [
+        "abstencion",
+        "tentativas"
+      ],
+      "atributos_prohibidos": {
+        "colores_principales": [
+          "verde"
+        ]
+      },
+      "grupo": "desarrollo",
+      "tipo": "contexto_color_entorno",
+      "origen": "validacion_contexto_verde"
+    },
+    {
+      "id": "contexto_verde_frutas",
+      "consulta": "Un ave de 15 cm comía frutas en áreas verdes. No recuerdo de qué color era.",
+      "esperado": null,
+      "estados_permitidos": [
+        "abstencion",
+        "tentativas"
+      ],
+      "atributos_prohibidos": {
+        "colores_principales": [
+          "verde"
+        ]
+      },
+      "grupo": "desarrollo",
+      "tipo": "contexto_color_entorno",
+      "origen": "validacion_contexto_verde"
+    },
+    {
+      "id": "contexto_verde_real",
+      "consulta": "Era una Psittacidae de 12,5 cm, verde con azul alrededor del ojo y en el ala. Comía semillas en espacios verdes.",
+      "esperado": "forpus_conspicillatus",
+      "atributos_esperados": {
+        "colores_principales": [
+          "verde",
+          "azul"
+        ]
+      },
+      "grupo": "desarrollo",
+      "tipo": "contexto_color_entorno",
+      "origen": "validacion_contexto_verde"
+    },
+    {
+      "id": "contexto_verde_azulejo",
+      "consulta": "En áreas verdes vi un ave gris azulada con alas de azul más intenso, de 16 cm, comiendo frutas.",
+      "esperado": "thraupis_episcopus",
+      "atributos_esperados": {
+        "colores_principales": [
+          "gris",
+          "azul"
+        ]
+      },
+      "atributos_prohibidos": {
+        "colores_principales": [
+          "verde"
+        ]
+      },
+      "grupo": "desarrollo",
+      "tipo": "contexto_color_entorno",
+      "origen": "validacion_contexto_verde"
     }
   ]
 }
