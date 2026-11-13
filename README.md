@@ -43,31 +43,41 @@ La selección tiene un sesgo de cobertura hacia las especies descritas en Enviga
 **Flujo metodológico de AvesCO**
 
 ```mermaid
+---
+config:
+  htmlLabels: false
+---
 flowchart TD
-    fichas["120 fichas con fuentes"] --> indice["Validar e indexar en Qdrant"]
-    consulta["Descripción del ave"] --> filtros["Extraer rasgos y filtrar por tamaño, familia y orden"]
-    filtros --> elegibles{"¿Hay pistas y fichas elegibles?"}
+    fichas["120 fichas citadas"] --> indice["Indexar en Qdrant"]
+    consulta["Descripción del ave"] --> rasgos["Extraer rasgos"]
+    rasgos --> filtros["Aplicar filtros"]
+    filtros --> elegibles{"¿Quedan fichas?"}
 
-    elegibles -->|Sí| buscar["Generar el embedding y recuperar fichas"]
+    elegibles -->|Sí| vector["Crear vector"]
+    vector --> buscar["Buscar fichas"]
     indice --> buscar
-    buscar --> evidencia{"¿Qué respalda la evidencia?"}
+    buscar --> evidencia{"¿Hay respaldo?"}
 
-    evidencia -->|Suficiente| coincidencias["Hasta 3 coincidencias"]
-    evidencia -->|Parcial| tentativas["Hasta 4 opciones tentativas"]
-    coincidencias --> respuesta["Añadir citas y validar la explicación por especie"]
-    tentativas --> respuesta
+    evidencia -->|Suficiente| firmes["Hasta 3 coincidencias"]
+    evidencia -->|Parcial| tentativas["Hasta 4 opciones"]
+    evidencia -->|Insuficiente| abstener["Abstención"]
+    elegibles -->|No| abstener
 
-    elegibles -->|No| abstencion["Abstenerse y pedir más pistas"]
-    evidencia -->|Insuficiente| abstencion
-    respuesta --> salida["Resultado de AvesCO"]
-    abstencion --> salida
-    salida --> interfaz["Mostrar en Gradio"]
+    firmes --> citas["Citas y explicación"]
+    tentativas --> citas
+    citas --> resultado["Resultado RAG"]
+    abstener --> resultado
+    resultado --> gradio["Mostrar en Gradio"]
 
-    casos["5 consultas finales"] --> consulta
-    casos --> base["Búsqueda por palabras"]
-    base --> evaluacion["Comparar aciertos, abstención y citas"]
-    salida --> evaluacion
+    casos["5 casos finales"] --> consulta
+    casos --> base["Línea base léxica"]
+    base --> evaluar["Comparar resultados"]
+    resultado --> evaluar
 ```
+
+Los filtros usan tamaño, familia y orden cuando hay pistas disponibles.
+Las opciones de respaldo parcial son tentativas. La explicación se valida por especie.
+La evaluación compara aciertos y abstención, y revisa las citas del RAG.
 
 ## 5. Diagrama de interacción (UML)
 
