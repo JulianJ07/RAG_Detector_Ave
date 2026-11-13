@@ -1,3 +1,4 @@
+# Presenta el resultado citado en Gradio y reúne las pistas de cada observación.
 """Interfaz local de AvesCO. Ejecutar con python app.py."""
 
 import argparse
@@ -61,14 +62,17 @@ def tarjetas_de_especies(aves, catalogo):
     for ave in aves:
         ficha = catalogo.aves[ave["id"]]
         nombre = escape(ave["nombre_comun"])
+        # Busca la foto con el ID de la ficha para evitar homónimos.
         ruta = FOTOS_GUIA / f'{ficha["id"]}.webp'
         foto = ""
+        # Incrusta la foto cuando existe para que la tarjeta pueda mostrarla.
         if ruta.is_file():
             contenido = b64encode(ruta.read_bytes()).decode("ascii")
             foto = (
                 f'<figure><img src="data:image/webp;base64,{contenido}" alt="Foto de {nombre}">'
                 '<figcaption>Guía de las aves de Envigado</figcaption></figure>'
             )
+        # Escapa los datos antes de insertarlos en el HTML.
         enlace = escape(ficha["fuente_pagina_o_url"], quote=True)
         tarjetas.append(
             '<article class="ficha-ave">'
@@ -85,9 +89,14 @@ def tarjetas_de_especies(aves, catalogo):
 
 
 def formatear_respuesta(resultado):
+    # Convierte coincidencias, explicación y citas en Markdown para la conversación.
+    # Empieza por el estado y deja la explicación antes de las fichas.
     partes = [resultado["mensaje"]]
     if resultado["nota"]:
         partes.append(resultado["nota"])
+    if resultado.get("explicacion"):
+        partes.append("**Por qué estas especies**\n" + resultado["explicacion"])
+    # Presenta las especies en el mismo orden que entregó el asistente.
     for i, ave in enumerate(resultado["aves"], start=1):
         partes.append(f"### {i}. {ave['nombre_comun']}\n*{ave['nombre_cientifico']}*")
         partes.append(f"**Tamaño en la guía** · {ave['tamano']}  \n{ave['plumaje']}.")
@@ -121,6 +130,7 @@ def reunir_pistas(mensaje, historial):
     familia_observacion = set(extraer_taxonomia(mensaje).get("familia", []))
     limite_familia = 1 if familia_observacion else None
     pistas = [mensaje]
+    # Reúne pistas recientes mientras sigan describiendo la misma ave.
     for anterior, respuesta in zip(historial[-2::-2], historial[-1::-2]):
         if anterior["role"] != "user" or respuesta["role"] != "assistant":
             break
@@ -141,12 +151,15 @@ def reunir_pistas(mensaje, historial):
 
 
 def construir_interfaz(asistente):
+    # Conecta la entrada de Gradio con el asistente y sus salidas.
     def responder(mensaje, history):
+        # Procesa la entrada y devuelve conversación, diagnóstico y tarjetas.
         mensaje = (mensaje or "").strip()
         if not mensaje:
             return "", history or [], {}, gr.skip()
         if len(mensaje) > 1600:
             raise gr.Error("La descripción admite hasta 1600 caracteres.")
+        # Un ejemplo del panel inicia una observación independiente.
         es_ejemplo = any(mensaje == ejemplo for _, ejemplo in EJEMPLOS)
         descripcion = mensaje if es_ejemplo else reunir_pistas(mensaje, history or [])
         if len(descripcion) > 1600:
@@ -155,7 +168,9 @@ def construir_interfaz(asistente):
             resultado = asistente.responder(descripcion)
             respuesta = formatear_respuesta(resultado)
             diagnostico = resultado["diagnostico"]
+            # El panel lateral muestra solo las especies de la última respuesta.
             tarjetas = tarjetas_de_especies(resultado["aves"], asistente.catalogo)
+        # Muestra el fallo sin perder el historial de la conversación.
         except ErrorModelo as error:
             respuesta = str(error)
             diagnostico = {"estado": "error_api"}
@@ -201,6 +216,7 @@ def construir_interfaz(asistente):
 
 
 def main():
+    # Lee las opciones del programa y prepara los recursos que necesita.
     os.environ.setdefault("GRADIO_ANALYTICS_ENABLED", "False")
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--puerto", type=int, default=7860)

@@ -1,3 +1,4 @@
+# Obtiene y prepara los insumos con los que se construye el catálogo.
 """Descarga y lectura de los insumos fijados para el Valle de Aburrá."""
 
 import csv
@@ -86,16 +87,19 @@ def descargar():
 
 
 def normalizar_texto(texto):
+    # Limpia espacios de los textos extraídos de las fuentes.
     return " ".join(unicodedata.normalize("NFKC", texto or "").split())
 
 
 def dwca(archivo, tabla):
+    # Lee una tabla del archivo de observaciones de biodiversidad.
     with ZipFile(RAW / archivo) as zip_file:
         with zip_file.open(tabla + ".txt") as entrada:
             yield from csv.DictReader(io.TextIOWrapper(entrada, encoding="utf-8-sig"), delimiter="\t")
 
 
 def observaciones():
+    # Agrupa los registros de presencia por especie.
     resultado = defaultdict(list)
     for fuente in ("AMVA_URBANA", "MEDELLIN_SAN_MIGUEL", "HUMEDALES_AMVA"):
         for fila in dwca(FUENTES[fuente][5], "occurrence"):
@@ -108,12 +112,14 @@ def observaciones():
             ):
                 continue
             nombre = normalizar_texto(fila["scientificName"])
+            # Reconoce un nombre binomial, como «Turdus fuscater».
             if re.fullmatch(r"[A-Z][a-z]+ [a-z]+", nombre):
                 resultado[nombre].append((fuente, fila))
     return resultado
 
 
 def indice_guia():
+    # Relaciona los nombres de la guía con la página correspondiente.
     resultado = {}
     with fitz.open(RAW / "envigado.pdf") as guia:
         for pagina in guia[354:361]:
@@ -121,6 +127,7 @@ def indice_guia():
             # El rótulo lateral puede unir dos filas contiguas al extraer el PDF.
             texto = re.sub(r"(\d{2,3})\s*PASSERIFORMES\s+(?=[A-Z]\w+\s+[A-Z][a-z]+ )", r"\1\n", texto)
             for linea in texto.splitlines():
+                # Reconoce un nombre binomial, como «Turdus fuscater».
                 campos = re.fullmatch(r"\s*(?:NO\s+)?([A-Z]\w+)\s+([A-Z][a-z]+ [a-z]+)\s+(.+?)\s+(\d{2,3})\s*", linea)
                 if campos:
                     orden, especie, comun, numero = campos.groups()
@@ -136,6 +143,7 @@ def indice_guia():
 
 
 def preparar_ocr(numeros):
+    # Prepara páginas para extraer los campos de las fichas.
     carpeta = RAW / "ocr_envigado"
     carpeta.mkdir(exist_ok=True)
     with fitz.open(RAW / "envigado.pdf") as guia:
@@ -156,6 +164,7 @@ def birdbase():
         for numero, valores in enumerate(filas, start=3):
             fila = dict(zip(columnas, valores))
             for valor in set(valores[2:7]):
+                # Reconoce un nombre binomial, como «Turdus fuscater».
                 if isinstance(valor, str) and re.fullmatch(r"[A-Z][a-z]+ [a-z]+", valor):
                     filas_por_nombre[valor][numero] = fila
     finally:

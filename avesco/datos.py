@@ -1,3 +1,4 @@
+# Carga las fichas y vincula cada rasgo mostrado con su evidencia.
 """Carga las fichas y comprueba que sus citas estén en el catálogo."""
 
 import csv
@@ -65,9 +66,11 @@ class Catalogo:
 
     @classmethod
     def cargar(cls, carpeta=DATA):
+        # Construye el objeto compartido a partir de sus archivos o su configuración.
         procesados = carpeta / "processed"
         ruta_fichas = procesados / "fichas_rag.jsonl"
         fichas = leer_jsonl(ruta_fichas)
+        # Indexa las especies por ID para cruzarlas con fichas y evidencias.
         aves = leer_jsonl(procesados / "aves.jsonl")
         evidencias = leer_jsonl(procesados / "evidencias.jsonl")
         if len(aves) != 120 or set(aves) != set(fichas) or set(aves) != set(evidencias):
@@ -75,8 +78,10 @@ class Catalogo:
         with (carpeta / "fuentes.csv").open(encoding="utf-8-sig", newline="") as archivo:
             fuentes = {fila["id"]: fila for fila in csv.DictReader(archivo)}
         vocab = json.loads((carpeta / "vocabularios.json").read_text(encoding="utf-8"))
+        # Aplica los aportes antes de validar el catálogo y calcular su huella.
         complementos = aplicar_complementos(carpeta, aves, fichas, evidencias, fuentes, vocab)
         for id_ave, ave in aves.items():
+            # Comprueba que cada rango se pueda comparar en el filtro de tamaño.
             bajo, alto = ave["longitud_min_cm"], ave["longitud_max_cm"]
             if not all(isinstance(x, (int, float)) and math.isfinite(x) for x in (bajo, alto)) or not 0 < bajo <= alto:
                 raise ValueError(f"Longitud inválida para {id_ave}.")

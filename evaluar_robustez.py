@@ -1,3 +1,4 @@
+# Registra trazas por etapa para localizar fallos en casos de evaluación.
 """Ejecuta casos etiquetados y guarda respuestas, trazas y métricas comparables."""
 
 import argparse
@@ -17,6 +18,7 @@ from avesco.modelos import ErrorModelo
 
 
 def cargar_casos(ruta, grupos, catalogo):
+    # Lee los casos solicitados y comprueba sus etiquetas contra el catálogo.
     casos = json.loads(ruta.read_text(encoding="utf-8"))["casos"]
     ids = [c["id"] for c in casos]
     if len(ids) != len(set(ids)):
@@ -33,6 +35,7 @@ def cargar_casos(ruta, grupos, catalogo):
 
 
 def informe_md(informe):
+    # Convierte las métricas y fallos en un informe legible.
     r = informe["resumen"]
     lineas = ["# Evaluación de AvesCO", "", f"Fecha UTC: {informe['metadata']['fecha_utc']}", "",
               f"Primera opción: **{r['top1']}/{r['positivas']}**. Entre las tres primeras: **{r['top3']}/{r['positivas']}**.",
@@ -75,6 +78,7 @@ def informe_md(informe):
 
 
 def main():
+    # Lee las opciones del programa y prepara los recursos que necesita.
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--casos", type=Path, default=RAIZ / "evaluacion/casos_robustez.json")
     parser.add_argument("--grupos", nargs="+", choices=["regresion", "desarrollo", "reserva"], default=["regresion", "desarrollo"])
@@ -101,6 +105,7 @@ def main():
     filas = []
 
     def guardar():
+        # Persiste las ejecuciones acumuladas para conservar resultados parciales.
         informe = {"metadata": metadata, "resumen": resumir(filas), "casos": filas}
         args.salida.write_text(json.dumps(informe, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
         args.salida.with_suffix(".md").write_text(informe_md(informe), encoding="utf-8")

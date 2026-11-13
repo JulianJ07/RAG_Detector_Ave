@@ -1,3 +1,4 @@
+# Prueba filtros, respuestas, citas e integración simulada con NVIDIA.
 import json
 from pathlib import Path
 from types import SimpleNamespace
@@ -26,11 +27,13 @@ DESCRIPCION_SINSONTE = (Path(__file__).parent / "datos/sinsonte.txt").read_text(
 
 @pytest.fixture(scope="module")
 def catalogo():
+    # Carga el mismo catálogo para las comprobaciones de este módulo.
     return Catalogo.cargar()
 
 
 @pytest.fixture
 def config():
+    # Proporciona una configuración de prueba sin una credencial real.
     return Configuracion("", "chat-prueba", "embed-prueba", 0.20, 0.80)
 
 
@@ -54,10 +57,12 @@ def config():
     ("Envergadura de alas de 1.33 m a 1.67 m.", None),
 ])
 def test_medidas(consulta, esperado):
+    # Comprueba medidas.
     assert extraer_tamano(consulta, 0.20) == esperado
 
 
 def test_catalogo_y_tamano(catalogo):
+    # Comprueba catalogo y tamano.
     assert len(catalogo.aves) == 120
     assert catalogo.aves["coereba_flaveola"]["nombre_comun"] == "Silga Mielera"
     assert catalogo.aves["falco_sparverius"]["nombre_comun"] == "Cernícalo"
@@ -69,6 +74,7 @@ def test_catalogo_y_tamano(catalogo):
 
 
 def test_atributos(catalogo):
+    # Comprueba atributos.
     atributos = extraer_atributos(
         "Gris, sin manchas rojas. Planeaba sobre un parque.", 0.2, catalogo.vocabularios,
     )
@@ -88,16 +94,20 @@ def test_atributos(catalogo):
 
 @pytest.mark.parametrize("descripcion", ["Ave carroñera", "Aves carroñeras", "Se alimenta de carroña"])
 def test_dieta_carronera(descripcion, catalogo):
+    # Comprueba dieta carronera.
     assert extraer_atributos(descripcion, 0.2, catalogo.vocabularios).dieta == ["carroña"]
 
 
 def test_gallinazo_con_longitud_y_envergadura(config, catalogo):
+    # Comprueba gallinazo con longitud y envergadura.
     def chat_json(_instrucciones, entrada):
+        # Simula la extracción o selección del modelo para aislar el caso.
         if "vocabulario" in entrada:
             return {"colores_principales": ["negro", "blanco"], "dieta": ["carroña"]}
         return {"ids": ["coragyps_atratus"]}
 
     def buscar(_texto, ids, top_k):
+        # Simula la recuperación y deja observar los IDs que pasan el filtro.
         assert "coragyps_atratus" in ids
         assert "milvago_chimachima" not in ids
         assert "rupornis_magnirostris" not in ids
@@ -118,6 +128,7 @@ def test_gallinazo_con_longitud_y_envergadura(config, catalogo):
     ("Es un colibrí.", "Trochilidae"),
 ])
 def test_taxonomia_explicita(texto, familia, catalogo):
+    # Comprueba taxonomia explicita.
     ids, criterios = filtrar_por_taxonomia(catalogo.aves, texto, list(catalogo.aves))
     assert ids
     assert criterios["familia"] == [familia]
@@ -126,18 +137,22 @@ def test_taxonomia_explicita(texto, familia, catalogo):
 
 @pytest.mark.parametrize("texto", ["No es un colibrí.", "No pertenece a la familia de los tiránidos.", "Ave de vientre amarillo."])
 def test_no_inferir_taxonomia(texto, catalogo):
+    # Comprueba no inferir taxonomia.
     ids, criterios = filtrar_por_taxonomia(catalogo.aves, texto, list(catalogo.aves))
     assert not criterios
     assert len(ids) == 120
 
 
 def test_siriri_respeta_tamano_y_taxonomia(config, catalogo):
+    # Comprueba siriri respeta tamano y taxonomia.
     def chat_json(_instrucciones, entrada):
+        # Simula la extracción o selección del modelo para aislar el caso.
         if "vocabulario" in entrada:
             return {"colores_principales": ["gris", "amarillo"], "dieta": ["insectos"]}
         return {"ids": ["tyrannus_melancholicus"]}
 
     def buscar(_texto, ids, top_k):
+        # Simula la recuperación y deja observar los IDs que pasan el filtro.
         assert "tyrannus_melancholicus" in ids
         assert "sporophila_intermedia" not in ids
         assert "colaptes_punctigula" not in ids
@@ -155,6 +170,7 @@ def test_siriri_respeta_tamano_y_taxonomia(config, catalogo):
 
 
 def test_descripcion_nueva_no_hereda_medidas():
+    # Comprueba descripcion nueva no hereda medidas.
     from app import reunir_pistas
 
     historial = [{"role": "user", "content": "Vi un ave marrón de unos 12 cm."},
@@ -165,6 +181,7 @@ def test_descripcion_nueva_no_hereda_medidas():
 
 
 def test_aclaracion_breve_conserva_observacion():
+    # Comprueba aclaracion breve conserva observacion.
     from app import reunir_pistas
 
     historial = [{"role": "user", "content": [{"type": "text", "text": "Vi un ave gris de 22 cm."}]},
@@ -177,12 +194,15 @@ def test_aclaracion_breve_conserva_observacion():
 
 @pytest.mark.parametrize("rango", ["22 y 28", "22 y 36"])
 def test_nombre_en_comparacion_no_excluye_torcaza(config, catalogo, rango):
+    # Comprueba nombre en comparacion no excluye torcaza.
     def chat_json(_instrucciones, entrada):
+        # Simula la extracción o selección del modelo para aislar el caso.
         if "vocabulario" in entrada:
             return {"colores_principales": ["gris"], "dieta": [], "entorno": [], "vuelo": []}
         return {"ids": ["zenaida_auriculata"]}
 
     def buscar(_texto, ids, top_k):
+        # Simula la recuperación y deja observar los IDs que pasan el filtro.
         assert "zenaida_auriculata" in ids
         assert "leptotila_verreauxi" in ids
         assert all(catalogo.aves[i]["familia"] == "Columbidae" for i in ids)
@@ -196,6 +216,7 @@ def test_nombre_en_comparacion_no_excluye_torcaza(config, catalogo, rango):
 
 
 def test_torcaza_datos_complementarios_citados(catalogo):
+    # Comprueba torcaza datos complementarios citados.
     import hashlib
     from avesco.configuracion import DATA
 
@@ -212,6 +233,7 @@ def test_torcaza_datos_complementarios_citados(catalogo):
 
 
 def test_torcaza_nueva_no_hereda_medida_anterior():
+    # Comprueba torcaza nueva no hereda medida anterior.
     from app import reunir_pistas
 
     historial = [{"role": "user", "content": "Era un ave de 12 cm."},
@@ -225,28 +247,34 @@ def test_torcaza_nueva_no_hereda_medida_anterior():
     ("Pertenece al orden Sphenisciformes.", "orden", "Sphenisciformes"),
 ])
 def test_taxonomia_sin_cobertura_no_se_ignora(catalogo, texto, campo, taxon):
+    # Comprueba taxonomia sin cobertura no se ignora.
     ids, criterios = filtrar_por_taxonomia(catalogo.aves, texto, list(catalogo.aves))
     assert criterios[campo] == [taxon]
     assert ids == []
 
 
 def test_familia_ausente_negada_no_restringe(catalogo):
+    # Comprueba familia ausente negada no restringe.
     ids, criterios = filtrar_por_taxonomia(catalogo.aves, "No pertenece a la familia Mimidae.", list(catalogo.aves))
     assert len(ids) == 120
     assert not criterios
 
 
 def test_sinonimo_paseriformes_no_crea_orden_inexistente(catalogo):
+    # Comprueba sinonimo paseriformes no crea orden inexistente.
     ids, criterios = filtrar_por_taxonomia(catalogo.aves, "Es un ave paseriforme, de los paseriformes.", list(catalogo.aves))
     assert ids
     assert criterios == {"orden": ["Passeriformes"]}
 
 
 def test_sinsonte_fuera_del_catalogo_no_sugiere_otras_familias(config, catalogo):
+    # Comprueba sinsonte fuera del catalogo no sugiere otras familias.
     def no_buscar(*args, **kwargs):
+        # Detecta si una consulta sin cobertura llegó a la búsqueda.
         pytest.fail("Una familia sin cobertura no debe llegar a la búsqueda ni a la selección.")
 
     def chat_json(_instrucciones, entrada):
+        # Simula la extracción o selección del modelo para aislar el caso.
         assert "vocabulario" in entrada
         return {"colores_principales": ["gris", "blanco"], "dieta": [], "entorno": [], "vuelo": []}
 
@@ -261,6 +289,7 @@ def test_sinsonte_fuera_del_catalogo_no_sugiere_otras_familias(config, catalogo)
 
 
 def test_sinsonte_descripcion_nueva_no_hereda_otro_tamano():
+    # Comprueba sinsonte descripcion nueva no hereda otro tamano.
     from app import reunir_pistas
 
     historial = [{"role": "user", "content": "Ave de 12 cm en el parque."},
@@ -270,6 +299,7 @@ def test_sinsonte_descripcion_nueva_no_hereda_otro_tamano():
 
 @pytest.mark.parametrize("pista_intermedia", [None, "Tenía alas blancas."])
 def test_cambio_de_familia_descarta_la_observacion_anterior(pista_intermedia):
+    # Comprueba cambio de familia descarta la observacion anterior.
     from app import reunir_pistas
 
     historial = [{"role": "user", "content": DESCRIPCION_SINSONTE},
@@ -282,6 +312,7 @@ def test_cambio_de_familia_descarta_la_observacion_anterior(pista_intermedia):
 
 
 def test_aclaracion_no_reincorpora_observacion_de_otra_familia():
+    # Comprueba aclaracion no reincorpora observacion de otra familia.
     from app import reunir_pistas
 
     historial = [{"role": "user", "content": DESCRIPCION_SINSONTE},
@@ -299,6 +330,7 @@ def test_aclaracion_no_reincorpora_observacion_de_otra_familia():
 
 
 def test_misma_familia_conserva_las_pistas():
+    # Comprueba misma familia conserva las pistas.
     from app import reunir_pistas
 
     historial = [{"role": "user", "content": "Familia Mimidae, ave gris de 25 cm."},
@@ -308,6 +340,7 @@ def test_misma_familia_conserva_las_pistas():
 
 
 def test_familia_negada_no_inicia_otra_observacion():
+    # Comprueba familia negada no inicia otra observacion.
     from app import reunir_pistas
 
     historial = [{"role": "user", "content": "Es un tiránido gris de 22 cm."},
@@ -316,7 +349,9 @@ def test_familia_negada_no_inicia_otra_observacion():
 
 
 def test_solo_familia_sin_cobertura_responde_sobre_esa_familia(config, catalogo):
+    # Comprueba solo familia sin cobertura responde sobre esa familia.
     def no_buscar(*args, **kwargs):
+        # Detecta si una consulta sin cobertura llegó a la búsqueda.
         pytest.fail("No debe buscar candidatas de una familia sin cobertura.")
 
     modelo = SimpleNamespace(chat_json=lambda *_: {"colores_principales": [], "dieta": [], "entorno": [], "vuelo": []})
@@ -332,6 +367,7 @@ def test_solo_familia_sin_cobertura_responde_sobre_esa_familia(config, catalogo)
 
 
 def test_rasgos_inventados_por_el_modelo(catalogo):
+    # Comprueba rasgos inventados por el modelo.
     inventados = {"colores_principales": ["marrón", "blanco"], "dieta": ["insectos"], "entorno": ["parque_jardin"]}
     atributos = extraer_atributos("Vi un Turdus fuscater en el parque.", 0.2, catalogo.vocabularios, inventados)
     assert atributos.colores_principales == []
@@ -340,6 +376,7 @@ def test_rasgos_inventados_por_el_modelo(catalogo):
 
 
 def test_verifica_cada_rasgo_y_normaliza_sinonimos(catalogo):
+    # Comprueba verifica cada rasgo y normaliza sinonimos.
     atributos = extraer_atributos("Era gris claro, de alas pardas. Comía moras.", 0.2, catalogo.vocabularios, {
         "colores_principales": ["gris_claro", "pardo", "rojo"],
         "dieta": ["frutas", "insectos"],
@@ -349,6 +386,7 @@ def test_verifica_cada_rasgo_y_normaliza_sinonimos(catalogo):
 
 
 def test_cambio_de_observacion_con_nombres_comunes():
+    # Comprueba cambio de observacion con nombres comunes.
     from app import reunir_pistas
 
     historial = [{"role": "user", "content": "Vi un colibrí verde de 10 cm."},
@@ -365,11 +403,14 @@ def test_cambio_de_observacion_con_nombres_comunes():
     ("Turdus fuscater", "vi un turdus fuscater", True),
 ])
 def test_nombres_que_son_palabras_comunes(nombre, texto, esperado):
+    # Comprueba nombres que son palabras comunes.
     assert menciona_nombre(nombre, texto) is esperado
 
 
 def test_tentativas_con_similitud_baja(config, catalogo):
+    # Comprueba tentativas con similitud baja.
     def buscar(_texto, ids, top_k):
+        # Simula la recuperación y deja observar los IDs que pasan el filtro.
         return [("cinclus_leucocephalus", config.umbral_similitud - 0.05)]
 
     asistente = AsistenteAves(config, catalogo, SimpleNamespace(retrieve_relevant_chunks=buscar),
@@ -378,11 +419,13 @@ def test_tentativas_con_similitud_baja(config, catalogo):
 
 
 def test_migas_de_pan_favorecen_aves_urbanas(catalogo):
+    # Comprueba migas de pan favorecen aves urbanas.
     config = Configuracion("", "chat-prueba", "embed-prueba", 0.20, 0.26)
     puntajes = {"sporophila_intermedia": 0.3816, "vanellus_chilensis": 0.3373,
                 "columba_livia": 0.3020, "patagioenas_fasciata": 0.2740}
 
     def buscar(_texto, ids, top_k):
+        # Simula la recuperación y deja observar los IDs que pasan el filtro.
         return sorted(((i, s) for i, s in puntajes.items() if i in ids), key=lambda p: -p[1])
 
     asistente = AsistenteAves(config, catalogo, SimpleNamespace(retrieve_relevant_chunks=buscar),
@@ -395,14 +438,17 @@ class ModeloPrueba:
     identificador = "modelo-prueba"
 
     def __init__(self):
+        # Conserva las dependencias que el objeto reutiliza durante el flujo.
         self.tipos = []
 
     def embeddings(self, textos, tipo):
+        # Devuelve un vector por entrada y conserva el orden del lote.
         self.tipos.append(tipo)
         return [[1.0, 0.0] for _ in textos]
 
 
 def test_indice_reutiliza_y_filtra(tmp_path, catalogo):
+    # Comprueba indice reutiliza y filtra.
     modelo = ModeloPrueba()
     indice = IndiceAves(catalogo, modelo, tmp_path)
     try:
@@ -422,6 +468,7 @@ def test_indice_reutiliza_y_filtra(tmp_path, catalogo):
 
 
 def test_abstencion_sin_busqueda(config, catalogo):
+    # Comprueba abstencion sin busqueda.
     asistente = AsistenteAves(config, catalogo, None, SimpleNamespace(chat_json=lambda *_: None))
     assert asistente.responder("Vi un ave.")["estado"] == "abstencion"
     assert asistente.responder("Ave roja de entre 110 y 120 cm.")["diagnostico"]["especies_despues_del_filtro"] == 0
@@ -429,12 +476,15 @@ def test_abstencion_sin_busqueda(config, catalogo):
 
 
 def test_cita_y_respuesta_del_llm_invalida(config, catalogo):
+    # Comprueba cita y respuesta del llm invalida.
     def chat_json(_instrucciones, entrada):
+        # Simula la extracción o selección del modelo para aislar el caso.
         if "vocabulario" in entrada:
             return {"colores_principales": ["azul"], "dieta": ["frutas"], "entorno": ["parque_jardin"]}
         return {"ids": ["especie_inventada"]}
 
     def buscar(_texto, ids, top_k):
+        # Simula la recuperación y deja observar los IDs que pasan el filtro.
         assert top_k >= 3
         assert "thraupis_episcopus" in ids
         assert "columba_livia" not in ids
@@ -449,10 +499,12 @@ def test_cita_y_respuesta_del_llm_invalida(config, catalogo):
 
 
 def test_contrato_nvidia_con_transporte_simulado(config):
+    # Comprueba contrato nvidia con transporte simulado.
     nvidia = ClienteNvidia(Configuracion("clave-prueba", config.modelo_chat, config.modelo_embed, 0.2, 0.6))
     llamadas = []
 
     def responder(request):
+        # Procesa la entrada y devuelve conversación, diagnóstico y tarjetas.
         llamadas.append((request.url.path, json.loads(request.content)))
         assert request.headers["authorization"] == "Bearer clave-prueba"
         if request.url.path.endswith("embeddings"):
@@ -469,3 +521,91 @@ def test_contrato_nvidia_con_transporte_simulado(config):
     assert llamadas[0][1]["input_type"] == "passage"
     assert llamadas[1][1]["input_type"] == "query"
     assert llamadas[2][1]["response_format"] == {"type": "json_object"}
+
+
+def _asistente_con_explicacion(config, catalogo, chat_texto):
+    """Asistente con recuperación y selección simuladas; solo cambia el texto que redacta el LLM."""
+    def chat_json(_instrucciones, entrada):
+        # Simula la extracción o selección del modelo para aislar el caso.
+        if "vocabulario" in entrada:
+            return {"colores_principales": ["azul"], "dieta": ["frutas"], "entorno": ["parque_jardin"]}
+        return {"ids": ["thraupis_episcopus"]}
+
+    modelo = SimpleNamespace(chat_json=chat_json, chat_texto=chat_texto)
+    indice = SimpleNamespace(retrieve_relevant_chunks=lambda _t, ids, top_k: [("thraupis_episcopus", 0.91)])
+    return AsistenteAves(config, catalogo, indice, modelo)
+
+
+CONSULTA_AZUL = "Era azul y comía fruta en un parque. Medía 16 cm."
+
+
+def test_explicacion_del_llm_se_muestra_y_usa_solo_las_fichas(config, catalogo):
+    # Comprueba explicacion del llm se muestra y usa solo las fichas.
+    entradas = []
+    nombre = catalogo.aves["thraupis_episcopus"]["nombre_comun"]
+
+    def chat_texto(instrucciones, entrada):
+        # Devuelve un borrador controlado para comprobar su validación.
+        entradas.append((instrucciones, entrada))
+        return f"{nombre} coincide en colores y dieta con lo descrito, y su tamaño de 16 cm encaja."
+
+    respuesta = _asistente_con_explicacion(config, catalogo, chat_texto).responder(CONSULTA_AZUL)
+    assert respuesta["explicacion"].startswith(nombre)
+    assert respuesta["diagnostico"]["explicacion"] == "generada con las fichas elegidas"
+    # El modelo solo recibe las fichas elegidas y sus coincidencias, nunca el catálogo completo.
+    assert [a["nombre_comun"] for a in entradas[0][1]["aves"]] == [nombre]
+    assert entradas[0][1]["aves"][0]["ficha"] == catalogo.fichas["thraupis_episcopus"]["texto"]
+    # Las citas siguen saliendo del catálogo.
+    assert any("p. 331" == c["localizador"] for c in respuesta["aves"][0]["citas"])
+
+
+@pytest.mark.parametrize(("borrador", "motivo"), [
+    ("Mira https://ejemplo.org/ave para más datos.", "enlaces"),
+    ("Parece una Paloma Doméstica por su tamaño.", "otra especie"),
+    ("Mide 45 cm según la ficha.", "cifra"),
+    ("", "vacía"),
+    ("a" * 901, "larga"),
+])
+def test_explicacion_no_confiable_se_descarta(config, catalogo, borrador, motivo):
+    # Comprueba explicacion no confiable se descarta.
+    respuesta = _asistente_con_explicacion(config, catalogo, lambda *_: borrador).responder(CONSULTA_AZUL)
+    assert respuesta["explicacion"] == ""
+    assert motivo in respuesta["diagnostico"]["explicacion"]
+    assert [a["id"] for a in respuesta["aves"]] == ["thraupis_episcopus"]
+
+
+def test_error_del_modelo_al_redactar_no_rompe_la_respuesta(config, catalogo):
+    # Comprueba error del modelo al redactar no rompe la respuesta.
+    def chat_texto(*_):
+        # Devuelve un borrador controlado para comprobar su validación.
+        raise ErrorModelo("NVIDIA limitó la solicitud.")
+
+    respuesta = _asistente_con_explicacion(config, catalogo, chat_texto).responder(CONSULTA_AZUL)
+    assert respuesta["estado"] == "coincidencias" and respuesta["explicacion"] == ""
+    assert respuesta["diagnostico"]["explicacion"].startswith("no generada")
+
+
+def test_sin_candidatas_no_se_llama_al_modelo_para_redactar(config, catalogo):
+    # Comprueba sin candidatas no se llama al modelo para redactar.
+    llamadas = []
+    asistente = AsistenteAves(config, catalogo, None, SimpleNamespace(
+        chat_json=lambda *_: None, chat_texto=lambda *a: llamadas.append(a) or "texto"))
+    assert asistente.responder("Vi un ave.")["estado"] == "abstencion"
+    assert not llamadas
+
+
+def test_contrato_chat_texto_sin_json_forzado(config):
+    # Comprueba contrato chat texto sin json forzado.
+    nvidia = ClienteNvidia(Configuracion("clave-prueba", config.modelo_chat, config.modelo_embed, 0.2, 0.6))
+    llamadas = []
+
+    def responder(request):
+        # Procesa la entrada y devuelve conversación, diagnóstico y tarjetas.
+        llamadas.append(json.loads(request.content))
+        return httpx.Response(200, json={"choices": [{"index": 0, "message": {"role": "assistant", "content": " Hola. "}}]})
+
+    with httpx.Client(transport=httpx.MockTransport(responder)) as transporte:
+        nvidia.client = OpenAI(api_key="clave-prueba", base_url=NVIDIA_URL, http_client=transporte, max_retries=0)
+        assert nvidia.chat_texto("instrucciones", {"aves": []}) == "Hola."
+    assert "response_format" not in llamadas[0]
+    assert llamadas[0]["chat_template_kwargs"] == {"enable_thinking": False}

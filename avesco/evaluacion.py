@@ -1,3 +1,4 @@
+# Compara la salida y la traza de cada consulta con el caso esperado.
 """Evaluación por etapas, sin alterar las decisiones del asistente."""
 
 from collections import Counter
@@ -5,9 +6,11 @@ from collections import Counter
 
 class IndiceObservado:
     def __init__(self, indice, traza):
+        # Conserva las dependencias que el objeto reutiliza durante el flujo.
         self.indice, self.traza = indice, traza
 
     def retrieve_relevant_chunks(self, texto, ids, top_k):
+        # Registra qué IDs llegaron al índice antes de delegar la recuperación.
         self.traza["ids_elegibles"] = list(ids)
         filas = self.indice.retrieve_relevant_chunks(texto, ids, top_k)
         self.traza["recuperadas"] = [{"id": id_ave, "similitud": score} for id_ave, score in filas]
@@ -16,13 +19,17 @@ class IndiceObservado:
 
 class ChatObservado:
     def __init__(self, modelo, traza):
+        # Conserva las dependencias que el objeto reutiliza durante el flujo.
         self.modelo, self.traza = modelo, traza
 
     def chat_json(self, instrucciones, entrada):
+        # Identifica la etapa antes de llamar al cliente y conservar su salida.
         etapa = "extraccion" if "vocabulario" in entrada else "seleccion"
         if etapa == "seleccion":
+            # Guarda qué candidatas recibió NVIDIA para la selección final.
             self.traza["preseleccion"] = [a["id"] for a in entrada["candidatas"]]
         respuesta = self.modelo.chat_json(instrucciones, entrada)
+        # Conserva la salida de esa etapa para contrastarla con el caso esperado.
         self.traza[etapa] = respuesta
         return respuesta
 
@@ -96,6 +103,7 @@ def revisar(caso, respuesta, catalogo, traza):
 
 
 def resumir(filas):
+    # Separa casos con especie esperada de casos que requieren abstención.
     positivas = [f for f in filas if f["esperado"]]
     negativas = [f for f in filas if not f["esperado"]]
     return {

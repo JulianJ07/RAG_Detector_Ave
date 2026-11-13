@@ -1,3 +1,4 @@
+# Guarda los embeddings en Qdrant y recupera fichas entre los IDs elegibles.
 """Crea y consulta el índice Qdrant persistente, sin servidor independiente."""
 
 import argparse
@@ -14,28 +15,36 @@ from avesco.modelos import ClienteNvidia
 
 class IndiceAves:
     def __init__(self, catalogo, modelo, carpeta):
+        # Conserva las dependencias que el objeto reutiliza durante el flujo.
         self.catalogo = catalogo
         self.modelo = modelo
+        # La huella cambia cuando cambian las fichas o el modelo de embeddings.
         self.huella = hashlib.sha256(f"{catalogo.huella_fichas}:{modelo.identificador}".encode()).hexdigest()
         self.coleccion = f"aves_{self.huella}"
         self.client = QdrantClient(path=str(carpeta))
+        # Deriva IDs estables para que el mismo registro se pueda recuperar al reabrir.
         self.ids = {id_ave: str(uuid.uuid5(uuid.NAMESPACE_URL, f"avesco/{id_ave}")) for id_ave in catalogo.aves}
 
     def asegurar(self):
         """Reutiliza el índice si coinciden fichas, modelo y cantidad de puntos."""
+        # Verifica que la colección existente tenga todas las fichas esperadas.
         existe = self.client.collection_exists(self.coleccion)
         if existe and self.client.count(self.coleccion, exact=True).count == len(self.ids):
             return False
         print(f"Indexando {len(self.ids)} fichas con {self.modelo.identificador}...", flush=True)
         fichas = list(self.catalogo.fichas.values())
         puntos = []
+        # Exige que todos los vectores tengan la misma cantidad de componentes.
         dimension = None
+        # Envía grupos de fichas para evitar una solicitud por cada especie.
         for inicio in range(0, len(fichas), 16):
             lote = fichas[inicio:inicio + 16]
             vectores = self.modelo.embeddings([f["texto"] for f in lote], "passage")
+            # Evita asociar una ficha con el vector de otra si el lote es incompleto.
             if len(vectores) != len(lote):
                 raise ValueError("El modelo devolvió una cantidad incorrecta de vectores.")
             for ficha, vector in zip(lote, vectores, strict=True):
+                # Exige que todos los vectores tengan la misma cantidad de componentes.
                 dimension = dimension or len(vector)
                 if not dimension or len(vector) != dimension or not all(math.isfinite(v) for v in vector) or not any(vector):
                     raise ValueError("El modelo devolvió un vector inválido.")
@@ -52,9 +61,12 @@ class IndiceAves:
         return True
 
     def retrieve_relevant_chunks(self, texto, ids_elegibles, top_k=12):
+        # Devuelve pares de ID y similitud solo para las especies permitidas.
         if not ids_elegibles:
             return []
+        # Marca el texto como consulta para el modelo de embeddings.
         (vector,) = self.modelo.embeddings([texto], "query")
+        # Aplica el filtro de IDs dentro de la búsqueda por coseno.
         resultado = self.client.query_points(
             self.coleccion, query=vector, limit=min(top_k, len(ids_elegibles)),
             query_filter=models.Filter(must=[models.HasIdCondition(
@@ -65,10 +77,12 @@ class IndiceAves:
         return [(p.payload["id_ave"], p.score) for p in resultado.points]
 
     def cerrar(self):
+        # Libera el índice para que otro proceso pueda abrir su carpeta.
         self.client.close()
 
 
 def crear_indice(config, catalogo):
+    # Abre o reconstruye el índice con el modelo configurado.
     modelo = ClienteNvidia(config)
     try:
         indice = IndiceAves(catalogo, modelo, CACHE / "qdrant_nvidia")

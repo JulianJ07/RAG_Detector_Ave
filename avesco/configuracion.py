@@ -1,3 +1,4 @@
+# Carga las opciones que comparten la interfaz, el índice y la evaluación.
 """Configuración compartida por la aplicación, el índice y la evaluación."""
 
 import os
@@ -26,13 +27,17 @@ class Configuracion:
 
     @classmethod
     def cargar(cls):
+        # Construye el objeto compartido a partir de sus archivos o su configuración.
         load_dotenv(RAIZ / ".env")
         clave = os.getenv("NVIDIA_API_KEY", "").strip()
         if not clave:
             raise ValueError("Configura NVIDIA_API_KEY en .env para conectarte a NVIDIA NIM.")
+        # El margen de 20 % contempla la incertidumbre de una medida aproximada.
         tolerancia = float(os.getenv("TOLERANCIA_TAMANO", "0.20"))
+        # El valor 0,26 es el umbral general que se ajustó con casos de calibración.
         umbral = float(os.getenv("UMBRAL_NVIDIA", "0.26"))
         if not 0 <= tolerancia <= 1 or not -1 <= umbral <= 1:
+            # El margen de 20 % contempla la incertidumbre de una medida aproximada.
             raise ValueError("Revisa TOLERANCIA_TAMANO y el umbral de similitud en .env.")
         return cls(
             clave, os.getenv("NVIDIA_CHAT_MODEL", CHAT_NVIDIA),

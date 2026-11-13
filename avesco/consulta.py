@@ -1,9 +1,11 @@
+# Normaliza las pistas y convierte medidas y taxonomía en filtros.
 """Normalización de atributos y filtro numérico en centímetros."""
 
 import re
 import unicodedata
 from dataclasses import dataclass, field
 
+# Agrupa expresiones equivalentes, como «pardo» y «marrón», por rasgo.
 ALIAS = {
     "colores_principales": {
         "negro": "negr[oa]s?|oscur[oa]s?|negruzc[oa]s?", "blanco": "blanc[oa]s?|blanquecin[oa]s?|crema|beige",
@@ -42,8 +44,11 @@ ALIAS = {
 }
 CAMPOS = tuple(ALIAS)
 CAMPOS_VERIFICADOS = ("colores_principales", "dieta")
+# Admite cantidades como «22», «1.5» o «12,5».
 NUMERO = r"\d{1,4}(?:[.,]\d+)?"
+# Reconoce unidades como «mm», «cms» y «pulgadas».
 UNIDAD = r"centimetros?|milimetros?|metros?|pulgadas?|cms|cm|mm|m"
+# Reconoce una medida como «16 cm» o un intervalo como «21 a 23 cm».
 MEDIDA = re.compile(
     rf"\b(?P<primera>{NUMERO})\s*(?:(?P<u1>{UNIDAD})\b\s*)?"
     rf"(?:(?:a|y|[-–—])\s*(?P<segunda>{NUMERO})\s*)?(?P<u2>{UNIDAD})\b"
@@ -56,10 +61,14 @@ def normalizar(texto):
 
 
 def tokens(texto):
+    # Extrae palabras normalizadas para la línea base léxica.
+    # Captura palabras como «parque» para comparar términos normalizados.
+    # Conserva palabras como «parque» y descarta términos de menos de tres letras.
     return set(re.findall(r"[a-z]{3,}", normalizar(texto)))
 
 
 def a_centimetros(numero, unidad):
+    # Unifica las unidades antes de comparar la consulta con las fichas.
     valor = float(numero.replace(",", "."))
     if unidad == "m" or unidad.startswith("metro"):
         return valor * 100
@@ -77,20 +86,25 @@ def extraer_tamano(texto, tolerancia):
     for m in MEDIDA.finditer(texto):
         antes = texto[:m.start()]
         despues = texto[m.end():]
+        # Descarta una cota o medida ajena, como «menos de 13 cm».
         if re.search(r"(?:hasta|menos de|mas de|altitud de|envergadura de|distancia de|no media)\s*$", antes):
             continue
         # La envergadura puede incluir «de alas de», «aproximada» o dos unidades.
         # Se descarta esa medida, sin perder la longitud corporal de otra cláusula.
         contexto = re.split(r"[,;\n!?]|\.(?!\d)", antes)[-1]
+        # Busca pistas como «envergadura» o «longitud» antes de la medida.
         dimensiones = list(re.finditer(
             r"\b(?:envergadura|altitud|distancia|longitud|largo|mide|media)\b", contexto,
         ))
+        # Acepta el sufijo corporal en «74 cm de longitud».
         es_longitud = re.match(r"\s+(?:de\s+)?(?:longitud|largo)\b", despues)
         if (dimensiones and dimensiones[-1][0] in {"envergadura", "altitud", "distancia"}
                 and not es_longitud):
             continue
+        # Excluye expresiones como «metros sobre el nivel del mar».
         if re.match(r"\s+(?:de (?:altura|envergadura|distancia)|sobre el nivel del mar|msnm)\b", despues):
             continue
+        # Excluye medidas como «150 cm de envergadura».
         if re.match(r"\s+(?:de\s+)?(?:envergadura|distancia)\b", despues):
             continue
         medidas.append(m)
@@ -116,13 +130,17 @@ class AtributosConsulta:
 def extraer_atributos(texto, tolerancia, vocabularios, extraidos=None):
     """Verifica medidas en la entrada original y limita atributos al vocabulario."""
     sin_tildes = normalizar(texto)
+    # Separa los valores respaldados del texto que propone NVIDIA.
     valores = {}
     for campo, patrones in ALIAS.items():
+        # Busca alias como «pardas» y evita negaciones como «sin manchas negras».
         respaldados = [
             etiqueta for etiqueta, patron in patrones.items()
             if any(
+                # Evita tomar «sin manchas negras» como una observación afirmativa.
                 not re.search(r"\b(?:no(?: era| es| tenia| vi| parecia)?|sin)(?: manchas| plumas| color)?\s*$",
                               sin_tildes[:m.start()])
+                # Busca una etiqueta completa, como «gris», dentro de la observación.
                 for m in re.finditer(rf"\b(?:{patron})\b", sin_tildes)
             )
         ]
@@ -138,7 +156,9 @@ def extraer_atributos(texto, tolerancia, vocabularios, extraidos=None):
                 if campo in CAMPOS_VERIFICADOS:
                     # NVIDIA puede devolver «gris claro» o «pardo» en vez de la etiqueta canónica.
                     if etiqueta is None:
+                        # Reduce «gris claro» a la etiqueta «gris».
                         literal = re.sub(r"\s+(?:clar[oa]|oscur[oa]|intens[oa])$", "", literal)
+                        # Exige que «pardo» coincida con el alias completo de marrón.
                         etiqueta = next((e for e in respaldados if re.fullmatch(patrones[e], literal)), None)
                     if etiqueta not in respaldados:
                         continue
@@ -177,16 +197,20 @@ def extraer_taxonomia(texto, aves=None):
         # Las familias y órdenes fuera del catálogo también son restricciones.
         # Ignorarlos permitiría responder con especies de otro grupo taxonómico.
         sufijo = "idae" if campo == "familia" else "formes"
+        # Busca una etiqueta completa, como «gris», dentro de la observación.
         for m in re.finditer(rf"\b[a-z]{{3,}}{sufijo}\b", texto):
             literal = m[0]
             canonico = next((taxon for taxon, patron in alias[campo].items()
+                             # Comprueba si el término completo corresponde a un alias.
                              if re.fullmatch(patron, literal)), literal.capitalize())
             taxones.setdefault(normalizar(canonico), canonico)
         for taxon in sorted(taxones.values()):
             patron = re.escape(normalizar(taxon))
             if taxon in alias[campo]:
                 patron += "|" + alias[campo][taxon]
+            # Busca una etiqueta completa, como «gris», dentro de la observación.
             for m in re.finditer(rf"\b(?:{patron})\b", texto):
+                # Omite una familia negada, como «no pertenece a Mimidae».
                 if re.search(
                     r"\bno(?:\s+(?:es|son|era|eran|parecia|vi|pertenece|pertenecen|a|la|el|familia|de|los|las|un|una))*\s*$",
                     texto[:m.start()],

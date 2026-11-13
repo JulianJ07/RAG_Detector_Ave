@@ -1,3 +1,4 @@
+# Lee las regiones de la guía que sirven para transcribir las fichas.
 """Reconstruye la transcripción factual desde las fichas gráficas de Envigado."""
 
 import argparse
@@ -19,17 +20,20 @@ COLUMNAS = (
 
 
 def paginas_seleccionadas():
+    # Devuelve las páginas necesarias para la transcripción.
     with (DATA / "plumaje_envigado.csv").open(encoding="utf-8") as archivo:
         return sorted(int(fila["pagina"]) for fila in csv.DictReader(archivo))
 
 
 def transcribir():
+    # Extrae los campos de la guía para producir el CSV intermedio.
     indice = {(p, n) for n, (p, _, _) in indice_guia().items()}
     for pagina in paginas_seleccionadas():
         ruta = RAW / "ocr_envigado" / f"{pagina:03}.json"
         palabras = json.loads(ruta.read_text(encoding="utf-8"))
 
         def zona(x_min, x_max, y_min, y_max):
+            # Acota la región de la página que se lee para un campo.
             region = (w for w in palabras if x_min <= w["x"] < x_max and y_min <= w["y"] < y_max)
             return " ".join(w["texto"] for w in region)
 
@@ -38,6 +42,7 @@ def transcribir():
         if len(nombres) != 1:
             raise ValueError(f"Página {pagina}: la ficha y el índice no coinciden.")
         tamanos = TAMANOS_VERIFICADOS.get(pagina, zona(130, 280, 475, 590))
+        # Valida tamaños transcritos, por ejemplo «21 23» o «12,5».
         if not re.fullmatch(r"\d+(?:[,.]\d+)?(?: \d+(?:[,.]\d+)?)?", tamanos):
             raise ValueError(f"Página {pagina}: revisar tamaño {tamanos!r}.")
         altitud = ALTITUDES_VERIFICADAS.get(pagina, zona(775, 1150, 565, 640)).replace("o", "0")

@@ -1,3 +1,4 @@
+# Cruza fuentes y publica los registros que consume el catálogo.
 """Construye y valida el dataset RAG a partir de los insumos documentados."""
 
 import argparse
@@ -71,12 +72,15 @@ REGIONES = {
 
 
 def leer_csv(ruta):
+    # Convierte las filas del insumo en diccionarios por columna.
     with ruta.open(encoding="utf-8-sig", newline="") as archivo:
         return list(csv.DictReader(archivo))
 
 
 def evidencia(fuente, ubicacion, extracto):
+    # Prepara una referencia con fuente, ubicación y un extracto breve.
     url = FUENTES[fuente][3]
+    # Extrae el número de una referencia como «p. 195, descripción».
     if fuente == GUIA and (pagina := re.match(r"p\. (\d+),", ubicacion)):
         url = FUENTES[GUIA][6] + f"#page={int(pagina[1]) + 2}"
     return {
@@ -86,19 +90,26 @@ def evidencia(fuente, ubicacion, extracto):
 
 
 def evidencia_registro(fuente, fila, extracto):
+    # Vincula una observación con su referencia original.
     return evidencia(fuente, f"occurrence.txt · occurrenceID {fila['occurrenceID']}", extracto)
 
 
 def leer_estudio_urbano():
+    # Extrae la clasificación urbana de las filas del estudio.
     html_articulo = (RAW / "urbanizacion.html").read_text(encoding="utf-8")
+    # Extrae secciones delimitadas por etiquetas de tabla en el artículo.
     tablas = re.findall(r"<table\b.*?</table>", html_articulo, flags=re.S)
     tabla = next(tabla for tabla in tablas if all(f">{x}<" in tabla for x in CLASE_URBANA))
     resultado = {}
+    # Separa cada fila de la tabla del artículo.
     for fila in re.findall(r"<tr\b.*?</tr>", tabla, flags=re.S):
+        # Extrae el contenido de las celdas de cada fila.
         celdas = re.findall(r"<td\b[^>]*>(.*?)</td>", fila, flags=re.S)
+        # Quita etiquetas como «<i>» antes de limpiar el nombre de la especie.
         textos = [normalizar_texto(html.unescape(re.sub(r"<[^>]*>", "", x))) for x in celdas]
         for categoria, nombre in zip(CLASE_URBANA, textos[1::2]):
             nombre = nombre.strip(" *")
+            # Reconoce un nombre binomial, como «Turdus fuscater».
             if re.fullmatch(r"[A-Z][a-z]+ [a-z]+", nombre):
                 resultado[nombre] = categoria
     if len(resultado) < 50:
@@ -107,14 +118,17 @@ def leer_estudio_urbano():
 
 
 def lista_natural(elementos):
+    # Formatea una lista de rasgos para leerla en la ficha.
     if len(elementos) < 2:
         return "".join(elementos)
     ultimo = elementos[-1]
+    # Usa «e» antes de palabras como «insectos».
     conjuncion = " e " if re.match(r"^(?:i|hi(?!e))", ultimo, flags=re.I) else " y "
     return ", ".join(elementos[:-1]) + conjuncion + ultimo
 
 
 def registrar_zonas(registros):
+    # Agrupa los municipios asociados a las observaciones.
     por_municipio = {}
     for fuente, fila in registros:
         municipio = fila["county"]
@@ -130,14 +144,17 @@ def entorno_local(registros, ambientes_guia):
         localidad = fila["locality"]
         if fuente == HUM and habitat == "Humedal" and "acuatico" in ambientes_guia:
             ambientes.setdefault("humedal", evidencia_registro(fuente, fila, habitat))
+        # Distingue descripciones como «bosque muy húmedo».
         if "bosque" in ambientes_guia and re.search(r"\bbosque (?:muy )?húmedo\b", habitat, flags=re.I):
             ambientes.setdefault("bosque_humedo", evidencia_registro(fuente, fila, habitat))
+        # Reconoce localidades de parque, como «parque de Laureles».
         if re.search(r"jardín botánico|parque de laureles|parque fátima|parque de malib[uú]", localidad, flags=re.I):
             ambientes.setdefault("parque_jardin", evidencia_registro(fuente, fila, localidad))
     return ambientes
 
 
 def limites_altitud(guia, nombre, rasgos, fila_bb):
+    # Devuelve límites altitudinales y su respaldo disponible.
     pagina = guia["pagina"]
     if nombre == "Quiscalus mexicanus":
         return rasgos["NormMin"], rasgos["NormMax"], evidencia(
@@ -149,6 +166,7 @@ def limites_altitud(guia, nombre, rasgos, fila_bb):
 
 
 def construir():
+    # Cruza presencia, taxonomía y rasgos para construir el catálogo.
     taxones = {r["scientificName"]: r for r in dwca("aco.zip", "taxon")}
     rasgos = birdbase()
     presencia = observaciones()
@@ -178,12 +196,14 @@ def construir():
         inferidos = set()
 
         def poner(campo, valor, referencias, inferido=False):
+            # Asocia un campo con su valor y guarda las referencias que lo respaldan.
             ave[campo] = valor
             traza[campo] = referencias if isinstance(referencias, list) else [referencias]
             if inferido:
                 inferidos.add(campo)
 
         def ficha(dato, extracto):
+            # Prepara una referencia a la página de la guía para el rasgo indicado.
             return evidencia(GUIA, f"p. {pagina}, {dato}", extracto)
 
         taxon = taxones[nombre]
@@ -255,6 +275,7 @@ def construir():
 
 
 def ficha_rag(ave):
+    # Convierte el registro estructurado en texto para el embedding.
     minimo, maximo = ave["longitud_min_cm"], ave["longitud_max_cm"]
     inferior, superior = (f"{n:g}".replace(".", ",") for n in (minimo, maximo))
     longitud = f"{inferior} centímetros" if minimo == maximo else f"entre {inferior} y {superior} centímetros"
@@ -283,6 +304,7 @@ def ficha_rag(ave):
 
 
 def validar(aves, fichas, trazas, presencia):
+    # Comprueba los registros y resume la cobertura del catálogo.
     vocab = json.loads((DATA / "vocabularios.json").read_text(encoding="utf-8"))
     errores = []
     ids = {ave["id"] for ave in aves}
@@ -291,6 +313,7 @@ def validar(aves, fichas, trazas, presencia):
         errores.append("Cantidad fuera de rango o especies duplicadas.")
     if [a["id"] for a in aves] != [f["id"] for f in fichas]:
         errores.append("Los IDs y el orden de las fichas deben coincidir con los registros.")
+    # Cuenta términos y decimales de la ficha para revisar su longitud.
     palabras = [len(re.findall(r"\b[\w]+(?:[,.][\d]+)?\b", f["texto"])) for f in fichas]
     for ave, longitud in zip(aves, palabras, strict=True):
         identificador = ave["id"]
@@ -336,6 +359,7 @@ def validar(aves, fichas, trazas, presencia):
 
 
 def casos_fuera(aves, presencia, rasgos, taxones):
+    # Reúne especies externas y comprueba su ausencia del catálogo.
     seleccion = {a["nombre_cientifico"] for a in aves}
     identificadores_locales = {rasgos[n][0] for n in set(presencia) | set(taxones) if n in rasgos}
     for nombre in FUERA:
@@ -350,6 +374,7 @@ def casos_fuera(aves, presencia, rasgos, taxones):
 
 
 def muestra_validacion(aves, trazas):
+    # Selecciona una muestra de evidencias para revisión manual.
     llave = ["id", "campo", "valor", "fuente_id", "fuente_url", "localizador", "evidencia"]
     existente = DATA / "validacion_muestra.csv"
     anteriores = {tuple(f[c] for c in llave): f["correcto (sí/no)"] for f in leer_csv(existente)} if existente.exists() else {}
@@ -374,6 +399,7 @@ def muestra_validacion(aves, trazas):
 
 
 def escribir_csv(ruta, filas):
+    # Serializa los registros para revisión en formato tabular.
     with ruta.open("w", encoding="utf-8-sig", newline="") as archivo:
         escritor = csv.DictWriter(archivo, fieldnames=list(filas[0]))
         escritor.writeheader()
@@ -385,12 +411,14 @@ def escribir_csv(ruta, filas):
 
 
 def escribir_jsonl(ruta, filas):
+    # Guarda un objeto por línea para la carga del catálogo.
     with ruta.open("w", encoding="utf-8", newline="\n") as archivo:
         for fila in filas:
             archivo.write(json.dumps(fila, ensure_ascii=False, allow_nan=False) + "\n")
 
 
 def publicar(aves, fichas, trazas, reporte, casos):
+    # Escribe el catálogo validado, sus evidencias y los informes.
     fuentes = [
         dict(
             id=clave, titulo=titulo, autor_institucion=autor, anio=anio, url=url,
