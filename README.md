@@ -1,6 +1,6 @@
 # AvesCO · Identificación de aves del Valle de Aburrá
 
-**Autores** · Julián Jiménez y Alejandro Cifuentes · **Curso** · SI3003 Inteligencia Artificial · **Fecha** · COMPLETAR
+**Autores** · Julián Jiménez y Alejandro Cifuentes · **Curso** · SI3003 Inteligencia Artificial ·
 
 ## 1. Introducción
 
