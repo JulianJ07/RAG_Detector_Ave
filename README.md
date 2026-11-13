@@ -37,7 +37,7 @@ La selección tiene un sesgo de cobertura hacia las especies descritas en Enviga
 1. **Preparación.** Se validan los IDs, las medidas y las citas. Nemotron 3.5 Embed 1B genera un vector por ficha en español para recuperar especies por similitud semántica. Qdrant guarda los vectores localmente y reutiliza el índice cuando coinciden el catálogo y el modelo.
 2. **Interpretación y filtros.** Nemotron 3.5 Lightning extrae atributos en JSON. Se comprueban colores, dieta y medidas contra la descripción. Se conserva un intervalo explícito y se usa ±20 % para una medida puntual, por la incertidumbre al estimar el tamaño. Se filtra por tamaño, familia u orden cuando hay pistas aplicables.
 3. **Recuperación y respuesta.** Se ordenan por coseno las fichas elegibles. Se revisan las primeras 14 para coincidencias, con una excepción para candidatas urbanas compatibles con comida humana. El modelo puede seleccionar hasta tres entre las cinco mejor respaldadas. El umbral general es 0,26. Las alternativas tentativas requieren al menos 0,24 y se limitan a cuatro. Una ficha puede entrar hasta 0,06 por debajo del umbral general cuando su longitud cabe en el intervalo escrito, coincide en tres o más colores y carece de diferencias comparables. La similitud expresa cercanía entre vectores. Con las fichas ya elegidas, Nemotron 3.5 Lightning redacta hasta 35 palabras por especie en llamadas independientes. Cada llamada recibe solo las coincidencias de esa candidata, sin la consulta libre, nombres, medidas ni otras fichas. El programa coloca nombres, tamaños, citas y las pistas exactas pendientes de contrastar. El LLM no decide ni reformula esos pendientes. Los controles rechazan, entre otros, claves internas, cifras, nombres y rasgos ajenos a esa evidencia; no constituyen una verificación semántica completa. Si un borrador falla, se conservan las fichas, sus citas y las explicaciones válidas de las demás candidatas. Las descripciones con solo tamaño, comida y entorno, sin colores, nombre ni familia explícitos, producen como máximo opciones tentativas y solicitan más pistas.
-4. **Evaluación.** Se calibró el umbral con cuatro consultas separadas de los cinco casos finales. La línea base cuenta palabras compartidas entre la consulta y las fichas. Se mide acierto entre los primeros tres resultados para las cuatro consultas positivas, abstención para la consulta externa y correspondencia de las citas con la evidencia del catálogo. Las consultas quedan fuera del índice. El evaluador también registra cuántas explicaciones pasaron la validación.
+4. **Evaluación.** Se calibró el umbral con cuatro consultas separadas de los cinco casos finales. La línea base cuenta palabras compartidas entre la consulta y las fichas. Se mide acierto entre los primeros tres resultados para las cuatro consultas positivas, abstención para la consulta externa y correspondencia de las citas con la evidencia del catálogo. Las consultas quedan fuera del índice.
 5. **Ejecución.** Se usan los modelos de NVIDIA NIM ya entrenados. Gradio muestra en el navegador los resultados citados, mantiene las aclaraciones de una misma observación y puede mostrar fotos locales. La API de NVIDIA requiere una clave e internet.
 
 **Flujo metodológico**
@@ -108,26 +108,17 @@ sequenceDiagram
 
 ## 6. Resultados
 
-Las dos tablas provienen de [evaluacion/resultados_nvidia.json](evaluacion/resultados_nvidia.json). Las consultas se reproducen tal como aparecen en el archivo y las especies de la respuesta se muestran en el orden registrado.
+Resultados de cinco consultas registrados en [evaluacion/resultados_nvidia.json](evaluacion/resultados_nvidia.json). Las especies aparecen en el orden de la respuesta.
 
-| Consulta | Resultado esperado | Respuesta obtenida | Valoración manual |
-| --- | --- | --- | --- |
-| Vi un ave de unos 13 cm, roja con alas negras. Atrapaba insectos en un jardín. | *Pyrocephalus rubinus* | Titiribí Pechirrojo | pendiente |
-| En un humedal vi un ave de unos 33 cm con pecho azul violáceo y alas verdosas. | *Porphyrio martinica* | Polla Azul | pendiente |
-| En un parque vi un ave gris azulada con alas de azul más intenso. Era de unos 16 cm y comía frutas. | *Thraupis episcopus* | Azulejo Común → Azulejo Palmero → Periquito Bronceado | pendiente |
-| Era de vientre amarillo y cabeza negra con ceja blanca. Medía entre 21 y 23 cm. ¿Qué coincidencia encaja con esa medida? | *Pitangus sulphuratus* | Bichofué Común → Bichofué Picudo | pendiente |
-| Vi un ave negra y blanca de entre 110 y 120 cm que caminaba erguida sobre el hielo. ¿Qué ave era? | Abstención | No puedo identificar el ave con la información disponible. Ninguna ficha coincide con esa medida. ¿Puedes revisar el tamaño aproximado? | pendiente |
-
-| Métrica | Línea base por palabras | RAG con NVIDIA |
+| Consulta | Resultado esperado | Respuesta obtenida |
 | --- | --- | --- |
-| Aciertos sobre el total | 2/5 | 5/5 |
-| Respuestas con citas válidas entre las evaluadas | Sin registro en el JSON | 4/4 |
-| Abstención en casos externos | 0/1 | 1/1 |
-| Explicaciones aceptadas | No aplica | pendiente de regenerar |
+| Vi un ave de unos 13 cm, roja con alas negras. Atrapaba insectos en un jardín. | *Pyrocephalus rubinus* | Titiribí Pechirrojo |
+| En un humedal vi un ave de unos 33 cm con pecho azul violáceo y alas verdosas. | *Porphyrio martinica* | Polla Azul |
+| En un parque vi un ave gris azulada con alas de azul más intenso. Era de unos 16 cm y comía frutas. | *Thraupis episcopus* | Azulejo Común → Azulejo Palmero → Periquito Bronceado |
+| Era de vientre amarillo y cabeza negra con ceja blanca. Medía entre 21 y 23 cm. ¿Qué coincidencia encaja con esa medida? | *Pitangus sulphuratus* | Bichofué Común → Bichofué Picudo |
+| Vi un ave negra y blanca de entre 110 y 120 cm que caminaba erguida sobre el hielo. ¿Qué ave era? | Abstención | No puedo identificar el ave con la información disponible. Ninguna ficha coincide con esa medida. ¿Puedes revisar el tamaño aproximado? |
 
-Un acierto corresponde a encontrar la especie esperada entre las tres primeras o a abstenerse cuando el caso espera abstención. Las citas se verifican en las respuestas para las que el JSON registra `citas_del_catalogo`.
-
-El caso del Bichofué Común también sirvió para ajustar la regla de tamaño y color. El sistema también propuso el Bichofué Picudo como segunda opción, aunque la especie esperada era el Bichofué Común. Una pista sobre el pico ayudaría a distinguirlos. Queda pendiente evaluar el sistema con observaciones independientes.
+En esta evaluación, el RAG obtuvo **5/5 aciertos**, frente a **2/5** de la búsqueda por palabras. Las alternativas de especies parecidas muestran que algunas descripciones no permiten una identificación única. La prueba es pequeña e incluye casos usados durante los ajustes; no permite estimar la precisión general.
 
 ## 7. Reproducibilidad
 
